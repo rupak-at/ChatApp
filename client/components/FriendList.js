@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React from "react";
 
-const FriendList = ({ onClickFriend , chattingFriend}) => {
+const FriendList = ({ onClickFriend , chattingFriend, searchFriend}) => {
   const friendList = [
     {
       id: 1,
@@ -86,25 +86,33 @@ const FriendList = ({ onClickFriend , chattingFriend}) => {
     },
   ];
 
+  
+    const searchedFriends = friendList.filter((friend)=>{
+      if (friend.userName.toLowerCase().includes(searchFriend.toLowerCase())){
+        return friend
+      }
+    })
+
+  
   return (
-    <div className="bg-gray-800 w-96 h-screen border-r-2 border-black font-serif shadow-lg overflow-y-scroll overscroll-y-contain scrollbar-none scroll-smooth">
+    <div className="bg-gray-800 w-96 px-[2px] h-screen font-serif shadow-lg overflow-y-scroll overscroll-y-contain scrollbar-none scroll-smooth">
       <div className="flex flex-col">
-        {friendList.map((friend) => (
+        {searchedFriends.map((friend) => (
           <div
             onClick={() => onClickFriend(friend)}
             key={friend.id}
-            className={`flex  items-center gap-3 p-3 cursor-pointer transition-all shadow-sm border-b border-gray-700 ${chattingFriend?.id === friend?.id ? 'bg-zinc-800': 'bg-gray-900 hover:bg-gray-700'}`}
+            className={`flex  items-center gap-3 p-3 cursor-pointer transition-all shadow-sm border-b border-gray-700 ${chattingFriend?.id === friend?.id ? 'bg-gray-900': ' bg-gray-800 hover:bg-gray-900'} rounded-md`}
           >
             <div className="relative">
               <Image
                 src={friend.image}
-                height={80}
-                width={80}
+                height={75}
+                width={75}
                 alt="Friend's Image"
                 className="rounded-full border-2 border-white shadow-sm"
               />
               <span
-                className={`h-3 w-3 rounded-full absolute ${
+                className={`h-4 w-4 border rounded-full absolute ${
                   friend.isActive ? "bg-green-500" : "bg-gray-600"
                 } bottom-1 right-2`}
               ></span>
@@ -112,9 +120,9 @@ const FriendList = ({ onClickFriend , chattingFriend}) => {
 
             <div className="flex flex-col gap-2">
               <div className="text-2xl text-gray-300">{friend.userName}</div>
-              <div className="text-sm text-gray-500 font-thin overflow-hidden">
+              {/* <div className="text-sm text-gray-500 font-thin overflow-hidden">
                 {friend.message}
-              </div>
+              </div> */}
             </div>
           </div>
         ))}

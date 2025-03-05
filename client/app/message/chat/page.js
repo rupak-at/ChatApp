@@ -7,19 +7,20 @@ import React, { useState } from 'react'
 const Chat = () => {
 
   const [selectedFriend, setSelectedFriend] = useState(null)
+  const [searchFriend, setSearchFriend] = useState('')
 
   const handleFriendSelected = (friend) => {
     setSelectedFriend(friend)
   }
-  console.log(selectedFriend);
+  console.log(searchFriend);
   return (
     <div className='flex h-screen overflow-hidden'>
       <div className='flex flex-col '>
         <div className='fixed top-0 z-50'>
-          <FriendListHeader />
+          <FriendListHeader setSearchFriend={setSearchFriend}/>
         </div>
-        <div className='mt-24 '>
-          <FriendList onClickFriend={handleFriendSelected} chattingFriend={selectedFriend}/>
+        <div className='mt-[105px] '>
+          <FriendList onClickFriend={handleFriendSelected} chattingFriend={selectedFriend} searchFriend={searchFriend}/>
         </div>
       </div>
       <div className='w-[calc(100vw-480px)] fixed top-0 right-0'>

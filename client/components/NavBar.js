@@ -21,9 +21,9 @@ const NavBar = () => {
           <Link
             key={id}
             href={nav.path}
-            className={`p-3 rounded-md flex justify-center items-center transition-all ${
+            className={`p-3 rounded-md flex justify-center items-center transition-all text-gary-900 ${
               pathName === nav.path
-                ? "bg-blue-600"
+                ? "bg-zinc-800"
                 : " hover:bg-gray-700"
             }`}
           >
