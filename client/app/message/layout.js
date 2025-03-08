@@ -7,7 +7,7 @@ const layout = ({ children }) => {
       <div className="fixed top-0 left-0 h-screen" >
         <NavBar />
       </div>
-      <div className="ml-24">{children}</div>
+      <div className="ml-20">{children}</div>
     </div>
   );
 };
