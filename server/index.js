@@ -5,8 +5,6 @@ import cookieParser from "cookie-parser";
 const port = process.env.PORT
 const app = e()
 
-app.use(cookieParser())
-app.use(e.json())
 
 connectDB().then(()=>{
     app.listen(port, ()=>{
@@ -14,4 +12,11 @@ connectDB().then(()=>{
     })
 })
 
+app.use(cookieParser())
+app.use(e.static('public'))
+app.use(e.urlencoded({extended: true}))
+app.use(e.json())
+
+
 app.use(userRoute)
+

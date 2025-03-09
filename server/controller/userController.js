@@ -1,13 +1,18 @@
 import { User } from "../model/userModel.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const options = {
   httpOnly: true,
   secure: true,
   sameSite: "Strict",
 };
+
 const registerUser = async (req, res) => {
   try {
+    const avatarPath = req.file?.path || null;
+
     const { username, email, password } = req.body;
+
     //check for empty value
     if (!username || !email || !password) {
       return res.status(401).json({ message: "All Field Are Required" });
@@ -25,10 +30,23 @@ const registerUser = async (req, res) => {
       return res.status(301).json({ message: "UserName Already Taken" });
     }
 
+    //upload image in clodinary if user has upload an image
+    let avatarURL;
+
+    if (avatarPath) {
+      const { optimizeUrl } = await uploadOnCloudinary(avatarPath);
+      avatarURL = optimizeUrl;
+    } else {
+      //if not a deafult image
+      avatarURL =
+        "https://res.cloudinary.com/duwi6qu6b/image/upload/v1741515762/default-profile_nekw1l.jpg";
+    }
+
     const user = await User.create({
       username,
       email,
       password,
+      avatar: avatarURL,
     });
 
     const createdUser = await User.findById(user._id).select(
