@@ -28,7 +28,7 @@ A real-time chat application built with modern web technologies.
 - [✅] Set up user registration and login functionality
 - [✅] Implement JWT authentication for secure access
 - [✅] Create user profile (username, email, password)
-- [  ] Upload Profile Picture
+- [✅] Upload Profile Picture
 - [✅] Hash passwords before storing them in the database
 
 ### Real-time Chat

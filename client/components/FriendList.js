@@ -96,7 +96,7 @@ const FriendList = ({ onClickFriend , chattingFriend, searchFriend}) => {
   
   return (
 
-<div className="bg-gray-900 w-96 h-screen font-sans shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+<div className="bg-gray-900 w-96 h-screen font-sans border-r shadow-lg overflow-y-auto scrollbar-none">
   <div className="flex flex-col">
     {searchedFriends.map((friend) => (
       <div
