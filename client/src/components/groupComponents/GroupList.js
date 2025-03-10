@@ -122,7 +122,7 @@ const GroupList = ({ handleGroupSelect, searchGroup ,selectGroup}) => {
                 height={56}
                 width={56}
                 alt="Friend's Image"
-                className="rounded-full object-cover"
+                className="rounded-full object-cover h-16 w-16"
               />
             ) : (
               <span className="text-xl text-gray-300">👤</span>

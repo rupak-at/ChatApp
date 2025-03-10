@@ -1,7 +1,7 @@
 'use client'
-import FriendChat from '@/components/FriendChat'
-import FriendList from '@/components/FriendList'
-import FriendListHeader from '@/components/FriendListHeader'
+import FriendChat from '@/components/friendComponents/FriendChat'
+import FriendList from '@/components/friendComponents/FriendList'
+import FriendListHeader from '@/components/friendComponents/FriendListHeader'
 import React, { useState } from 'react'
 
 
