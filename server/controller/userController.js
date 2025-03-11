@@ -121,4 +121,66 @@ const logoutUser = async (req, res) => {
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
-export { registerUser, loginUser, logoutUser };
+
+const updateAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.userID);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    const avatarPath = req.file?.path 
+
+    if (avatarPath) {
+      const { optimizeUrl } = await uploadOnCloudinary(avatarPath);
+      user.avatar = optimizeUrl;
+      await user.save();
+      return res.status(200).json({ message: "Avatar Updated Successfully" });
+    }
+
+    return res.status(404).json({ message: "Avatar Not Found" });
+
+  }catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }    
+};
+
+const updateUserName = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findById(req.userID);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+
+    const existedUserName = await User.findOne({ username });
+
+    if (existedUserName) {
+      return res.status(409).json({ message: "UserName Already Taken" });
+    }
+
+    user.username = username;
+    await user.save();
+
+    return res.status(200).json({ message: "Username Updated Successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.userID);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    await user.deleteOne();
+    return res.status(200).json({ message: "User Deleted Successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
+
+export { registerUser, loginUser, logoutUser , updateAvatar, updateUserName, deleteUser};
