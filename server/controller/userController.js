@@ -15,19 +15,19 @@ const registerUser = async (req, res) => {
 
     //check for empty value
     if (!username || !email || !password) {
-      return res.status(401).json({ message: "All Field Are Required" });
+      return res.status(400).json({ message: "All Field Are Required" });
     }
 
     const existedUser = await User.findOne({ email });
     //check for existing email
     if (existedUser) {
-      return res.status(301).json({ message: "User Already Existed" });
+      return res.status(409).json({ message: "User Already Existed" });
     }
 
     const existedUserName = await User.findOne({ username });
     //check for unique username
     if (existedUserName) {
-      return res.status(301).json({ message: "UserName Already Taken" });
+      return res.status(409).json({ message: "UserName Already Taken" });
     }
 
     //upload image in clodinary if user has upload an image
@@ -69,13 +69,13 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(402).json({ message: "User Not Registered" });
+      return res.status(404).json({ message: "User Not Registered" });
     }
     //validate password
     const validPassword = await user.comparePassword(password);
 
     if (!validPassword) {
-      return res.status(402).json({ message: "Invalid Credrentials" });
+      return res.status(401).json({ message: "Invalid Credrentials" });
     }
 
     const refreshToken = await user.generateRefreshToken();
@@ -89,7 +89,15 @@ const loginUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, options);
     res.cookie("accessToken", accessToken, options);
 
-    res.status(200).json({ message: "Login Successfully" });
+    res.status(200).json({
+      message: "Login Successfully",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });

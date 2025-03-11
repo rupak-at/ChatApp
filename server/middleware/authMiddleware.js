@@ -6,13 +6,13 @@ const verifyLogin = (req, res, next) => {
         const token = req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ','') 
 
         if (!token) {
-            return res.status(401).json('No Token Found')
+            return res.status(401).json({message: 'No Token Found'})
         }
         //checking the token
         const verifyToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
 
         if (!verifyToken) {
-            return res.status(403).json({message: 'Invalid Token'})
+            return res.status(401).json({message: 'Invalid Token'})
         }
         //sending id to the next router /logout
         req.userID = verifyToken._id 
