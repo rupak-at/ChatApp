@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -14,6 +15,7 @@ import {
 } from "react-icons/fa6";
 
 const Signup = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -37,10 +39,24 @@ const Signup = () => {
         formData
       );
 
-      toast.success(response.data.message);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        router.push("/login");
+      }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error(error.response?.data?.message || "An error occurred.");
+      const { message } = error.response?.data;
+
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.error(message);
+        }
+        if (error.response.status === 409) {
+          toast.error(message);
+        }
+        if (error.response.status === 500) {
+          toast.error(message);
+        }
+      }
     }
   };
 
