@@ -1,8 +1,13 @@
 import e from "express";
 import connectDB from "./db/database.js";
-import userRoute from "./router/userRoute.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
+
+import userRoute from "./router/userRoute.js"
+import singleChatRoute from "./router/singleChatRoute.js"
+import groupChatRoute from "./router/groupRoute.js"
+
+
 const port = process.env.PORT
 const app = e()
 
@@ -25,4 +30,6 @@ app.use(e.json())
 
 
 app.use(userRoute)
+app.use(singleChatRoute)
+app.use("/group",groupChatRoute)
 

@@ -107,7 +107,7 @@ const loginUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   try {
     //getting is from middleaware and updating refreshToken to null for logout
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.userID,
       { $set: { refreshToken: null } },
       { new: true }
@@ -115,7 +115,7 @@ const logoutUser = async (req, res) => {
     //removing the cookie
     res.clearCookie("refreshToken", options);
     res.clearCookie("accessToken", options);
-    res.status(200).json({ message: "Logout Successfully" });
+    res.status(200).json({ message: `Logout Successfully from ${user.username}` });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
