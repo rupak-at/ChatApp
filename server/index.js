@@ -6,6 +6,7 @@ import cors from "cors";
 import userRoute from "./router/userRoute.js"
 import singleChatRoute from "./router/singleChatRoute.js"
 import groupChatRoute from "./router/groupRoute.js"
+import friendRequest from "./router/friendRequestRoute.js";
 
 
 const port = process.env.PORT
@@ -30,6 +31,8 @@ app.use(e.json())
 
 
 app.use(userRoute)
-app.use(singleChatRoute)
+// chat routes
+app.use("/user",singleChatRoute)
 app.use("/group",groupChatRoute)
+app.use("/request", friendRequest)
 
