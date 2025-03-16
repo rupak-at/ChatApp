@@ -1,3 +1,4 @@
+import { FriendRequest } from "../model/friendRequestModel.js";
 import { User } from "../model/userModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -183,4 +184,38 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, logoutUser , updateAvatar, updateUserName, deleteUser};
+const getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userID).select(
+      "-password -refreshToken"
+    )
+
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+
+    const friendList = await FriendRequest.find(
+      {
+        $or: [
+          { sender: user._id },
+          { receiver: user._id },
+        ],
+        $and: [{ status: "accepted" }]
+      }
+    ).populate("sender receiver")
+    
+    const friends = friendList.filter((f)=> f.sender._id.toString() !== req.userID || f.receiver._id.toString() !== req.userID).map((f) => f.sender._id.toString() === req.userID ? f.receiver : f.sender)
+    
+    const formattedFriends = friends.map((f) => ({
+      _id: f._id,
+      username: f.username,
+      avatar: f.avatar
+    }))
+
+    return res.status(200).json({ message: "User Profile", user, Friends: formattedFriends, TotalFriends: formattedFriends.length });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+}
+export { registerUser, loginUser, logoutUser , updateAvatar, updateUserName, deleteUser, getMyProfile};

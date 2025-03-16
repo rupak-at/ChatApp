@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteUser, loginUser, logoutUser, registerUser, updateAvatar, updateUserName } from "../controller/userController.js";
+import { deleteUser, getMyProfile, loginUser, logoutUser, registerUser, updateAvatar, updateUserName } from "../controller/userController.js";
 import verifyLogin from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadFileMiddleware.js"
 
@@ -13,5 +13,6 @@ app.post('/logout',verifyLogin ,logoutUser)
 app.post('/updateAvatar',verifyLogin ,upload.single('avatar'), updateAvatar)
 app.post('/updateUserName',verifyLogin ,updateUserName)
 app.delete('/deleteUser',verifyLogin ,deleteUser)
+app.get('/getMyProfile',verifyLogin ,getMyProfile)
 
 export default app
