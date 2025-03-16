@@ -5,6 +5,7 @@ import {
   deleteGroup,
   leaveGroup,
   myGroups,
+  myMessages,
   removeMember,
 } from "../controller/groupController.js";
 import verifyLogin from "../middleware/authMiddleware.js";
@@ -18,5 +19,6 @@ app.put("/addMember", addMember);
 app.put("/removeMember", removeMember);
 app.delete("/leaveGroup/:id", leaveGroup);
 app.get("/myGroups", myGroups);
+app.get("/myMessages/:id", myMessages);
 
 export default app;

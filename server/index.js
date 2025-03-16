@@ -7,6 +7,7 @@ import userRoute from "./router/userRoute.js"
 import singleChatRoute from "./router/singleChatRoute.js"
 import groupChatRoute from "./router/groupRoute.js"
 import friendRequest from "./router/friendRequestRoute.js";
+import atomRoute from "./router/singleChatRoute.js"
 
 
 const port = process.env.PORT
@@ -18,7 +19,6 @@ connectDB().then(()=>{
         console.log('App Running on', port)
     })
 })
-
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['POST', 'GET', 'DELETE', 'PATCH'],
@@ -35,4 +35,5 @@ app.use(userRoute)
 app.use("/user",singleChatRoute)
 app.use("/group",groupChatRoute)
 app.use("/request", friendRequest)
+app.use("/atom", atomRoute)
 

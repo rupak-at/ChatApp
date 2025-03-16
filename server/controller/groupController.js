@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { GroupChat } from "../model/groupChatModel.js";
-import { User } from "../model/userModel.js";
+import { Message } from "../model/messageModel.js";
 
 const createGroup = async (req, res) => {
   try {
@@ -210,4 +210,38 @@ const myGroups = async (req, res) => {
   }
 }
 
-export { createGroup, deleteGroup, addMember, removeMember, leaveGroup, myGroups };
+const myMessages = async (req, res) => {
+  try {
+    const groupId = req.params.id
+
+    const group = await GroupChat.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group Not Found" });
+    }
+
+    if (!group.participants.includes(req.userID)) {
+      return res.status(401).json({ message: "You Are Not In The Group" });
+    }
+
+    const messages = await Message.find({ chatId: groupId, chatType: "GroupChat" }).populate("sender");
+
+    if (messages.length === 0) {
+      return res.status(404).json({ message: `No Messages Found in ${group.groupName}` });
+    }
+
+    const formattedMessages = messages.map(({sender, content, createdAt}) => ({
+      sender: sender.username,
+      content,
+      createdAt
+    }));
+
+    return res.status(200).json({ Group: group.groupName, messages: formattedMessages });
+    
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+}
+
+export { createGroup, deleteGroup, addMember, removeMember, leaveGroup, myGroups, myMessages };
