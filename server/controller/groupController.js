@@ -158,7 +158,7 @@ const removeMember = async (req, res) => {
 
 const leaveGroup = async (req, res) => {
   try {
-    const { groupID } = req.body;
+    const groupID = req.params.id
 
     if (!mongoose.isValidObjectId(groupID)) {
       return res.status(400).json({ message: "Invalid Group ID" });
@@ -189,4 +189,25 @@ const leaveGroup = async (req, res) => {
   }
 };
 
-export { createGroup, deleteGroup, addMember, removeMember, leaveGroup };
+const myGroups = async (req, res) => {
+  try {
+    const groups = await GroupChat.find({ participants: req.userID });
+    
+    if (groups.length === 0) {
+      return res.status(404).json({ message: "No Groups Found" });
+    }
+
+    const formattedGroups = groups.map(({groupName, _id}) => ({
+      _id,
+      groupName,
+    }));
+    
+    return res.status(200).json({ message: "My Groups", groups: formattedGroups });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+}
+
+export { createGroup, deleteGroup, addMember, removeMember, leaveGroup, myGroups };
