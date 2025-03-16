@@ -75,15 +75,14 @@ const deleteGroup = async (req, res) => {
 
 const addMember = async (req, res) => {
   try {
-
     const { groupID, memberID } = req.body;
 
-    if (!groupID || !memberID) {
+    if (!groupID || !memberID || memberID.length === 0) {
       return res.status(400).json({ message: "All Field Are Required" });
     }
 
     //check for valid mongodb _id
-    if (!mongoose.isValidObjectId(groupID) || !mongoose.isValidObjectId(memberID)) {
+    if (!mongoose.isValidObjectId(groupID)) {
       return res.status(400).json({ message: "Invalid Group ID || Member ID" });
     }
 
@@ -92,20 +91,21 @@ const addMember = async (req, res) => {
       return res.status(404).json({ message: "Group Not Found" });
     }
 
-    const validUser = await User.findById(memberID);
-    if (!validUser){
-      return res.status(404).json({ message: "Member Not Found" });
-    }
-
-
     if (!group.participants.includes(req.userID)) {
-      return res.status(401).json({ message: "You Are Not In The Group"});
+      return res.status(401).json({ message: "You Are Not In The Group" });
     }
 
-    await group.updateOne({ $push: { participants: memberID } });
+    const oldMembers = group.participants;
 
-    return res.status(200).json({ message: `Member Added Successfully to ${group.groupName}` });
-    
+    const newMembers = memberID.filter((id) => !oldMembers.includes(id));
+
+    group.participants = [...oldMembers, ...newMembers];
+
+    await group.save();
+
+    return res
+      .status(200)
+      .json({ message: `Member Added Successfully to ${group.groupName}` });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
@@ -114,41 +114,79 @@ const addMember = async (req, res) => {
 
 const removeMember = async (req, res) => {
   try {
-    const {groupID, memberID} = req.body;
+    const { groupID, memberID } = req.body;
 
     if (!groupID || !memberID) {
       return res.status(400).json({ message: "All Field Are Required" });
     }
 
-    //check for valid mongodb _id 
-    if (!mongoose.isValidObjectId(groupID) || !mongoose.isValidObjectId(memberID)) {
-        return res.status(400).json({ message: "Invalid Group ID || Member ID" });
+    //check for valid mongodb _id
+    if (
+      !mongoose.isValidObjectId(groupID) ||
+      !mongoose.isValidObjectId(memberID)
+    ) {
+      return res.status(400).json({ message: "Invalid Group ID || Member ID" });
     }
 
     const group = await GroupChat.findById(groupID);
 
     if (!group) {
       return res.status(404).json({ message: "Group Not Found" });
-    } 
+    }
     //check for admin id so that admin cannot be removed by other member
     if (group.groupAdmin.toString() === memberID) {
       return res.status(401).json({ message: "Admin Cannot Be Removed" });
     }
 
-    const groupMember = group.participants.find((id) => id.toString() === memberID)
+    const groupMember = group.participants.find(
+      (id) => id.toString() === memberID
+    );
     if (!groupMember) {
       return res.status(404).json({ message: "Member Not Found In The Group" });
     }
 
     await group.updateOne({ $pull: { participants: memberID } });
 
-    return res.status(200).json({ message: `Member Removed Successfully from ${group.groupName}` });
+    return res
+      .status(200)
+      .json({ message: `Member Removed Successfully from ${group.groupName}` });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
 
+const leaveGroup = async (req, res) => {
+  try {
+    const { groupID } = req.body;
 
+    if (!mongoose.isValidObjectId(groupID)) {
+      return res.status(400).json({ message: "Invalid Group ID" });
+    }
 
-export { createGroup, deleteGroup, addMember, removeMember };
+    const group = await GroupChat.findById(groupID);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group Not Found" });
+    }
+
+    if (!group.participants.includes(req.userID)) {
+      return res.status(401).json({ message: "You Are Not In The Group" });
+    }
+
+    if (group.groupAdmin.toString() === req.userID.toString()) {
+      return res.status(401).json({ message: "Admin Cannot Leave The Group" });
+    }
+
+    await group.updateOne({ $pull: { participants: req.userID } });
+
+    return res
+      .status(200)
+      .json({ message: `You Left The Group ${group.groupName}` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
+
+export { createGroup, deleteGroup, addMember, removeMember, leaveGroup };
