@@ -44,9 +44,9 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-700 to-purple-400 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-500 to-indigo-600  p-4">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-md">
-        <div className="bg-gradient-to-r from-gray-600 to-purple-900 p-6">
+        <div className="bg-gradient-to-r from-gray-600 to-purple-700 p-6">
           <h2 className="text-3xl font-bold text-white text-center">
             KURAKANI
           </h2>
