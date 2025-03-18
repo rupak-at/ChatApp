@@ -8,9 +8,9 @@ import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
 import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react";
 
 const LoginForm = () => {
-
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
@@ -18,7 +18,7 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm();
 
   const handleLogin = async (data) => {
@@ -28,8 +28,8 @@ const LoginForm = () => {
       });
 
       if (response.status === 200) {
-        const {message, user} = response.data;
-        dispatch(loadUserInfo(user))
+        const { message, user } = response.data;
+        dispatch(loadUserInfo(user));
         toast.success(message + " to " + user.username);
         router.push("/message");
       }
@@ -138,11 +138,20 @@ const LoginForm = () => {
 
             {/* Submit Button */}
             <button
+              disabled={isSubmitting}
               type="submit"
               className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-gray-600 to-purple-700 hover:from-gray-700 hover:to-purple-800 text-white font-bold py-3 px-4 rounded-lg transition-all"
             >
-              <span>Sign in</span>
-              <FaArrowRight className="h-4 w-4" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                </>
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <FaArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
 
             {/* Create Account Link */}
