@@ -116,7 +116,9 @@ const logoutUser = async (req, res) => {
     //removing the cookie
     res.clearCookie("refreshToken", options);
     res.clearCookie("accessToken", options);
-    res.status(200).json({ message: `Logout Successfully from ${user.username}` });
+    res
+      .status(200)
+      .json({ message: `Logout Successfully from ${user.username}` });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
@@ -129,7 +131,7 @@ const updateAvatar = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
-    const avatarPath = req.file?.path 
+    const avatarPath = req.file?.path;
 
     if (avatarPath) {
       const { optimizeUrl } = await uploadOnCloudinary(avatarPath);
@@ -139,11 +141,10 @@ const updateAvatar = async (req, res) => {
     }
 
     return res.status(404).json({ message: "Avatar Not Found" });
-
-  }catch (error) {
+  } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
-  }    
+  }
 };
 
 const updateUserName = async (req, res) => {
@@ -188,34 +189,88 @@ const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.userID).select(
       "-password -refreshToken"
-    )
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
 
-    const friendList = await FriendRequest.find(
-      {
-        $or: [
-          { sender: user._id },
-          { receiver: user._id },
-        ],
-        $and: [{ status: "accepted" }]
-      }
-    ).populate("sender receiver")
-    
-    const friends = friendList.filter((f)=> f.sender._id.toString() !== req.userID || f.receiver._id.toString() !== req.userID).map((f) => f.sender._id.toString() === req.userID ? f.receiver : f.sender)
-    
+    const friendList = await FriendRequest.find({
+      $or: [{ sender: user._id }, { receiver: user._id }],
+      $and: [{ status: "accepted" }],
+    }).populate("sender receiver");
+
+    const friends = friendList
+      .filter(
+        (f) =>
+          f.sender._id.toString() !== req.userID ||
+          f.receiver._id.toString() !== req.userID
+      )
+      .map((f) =>
+        f.sender._id.toString() === req.userID ? f.receiver : f.sender
+      );
+
     const formattedFriends = friends.map((f) => ({
       _id: f._id,
       username: f.username,
-      avatar: f.avatar
-    }))
+      avatar: f.avatar,
+    }));
 
-    return res.status(200).json({ message: "User Profile", user, Friends: formattedFriends, TotalFriends: formattedFriends.length });
+    return res
+      .status(200)
+      .json({
+        message: "User Profile",
+        user,
+        Friends: formattedFriends,
+        TotalFriends: formattedFriends.length,
+      });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
   }
-}
-export { registerUser, loginUser, logoutUser , updateAvatar, updateUserName, deleteUser, getMyProfile};
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.userID);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "All Fields Are Required" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old Password And New Password Are Same" });
+    }
+
+    const validPassword = await user.comparePassword(oldPassword);
+
+    if (!validPassword) {
+      return res.status(401).json({ message: "Invalid Credrentials" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password Updated Successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  updateAvatar,
+  updateUserName,
+  deleteUser,
+  getMyProfile,
+  updatePassword,
+};
