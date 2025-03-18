@@ -1,13 +1,17 @@
 "use client";
+import { loadUserInfo } from "@/components/reduxFeatures/loginInfoSlice";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 const LoginForm = () => {
+
+  const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
@@ -24,6 +28,9 @@ const LoginForm = () => {
       });
 
       if (response.status === 200) {
+        const {message, user} = response.data;
+        dispatch(loadUserInfo(user))
+        toast.success(message + " to " + user.username);
         router.push("/message");
       }
     } catch (error) {

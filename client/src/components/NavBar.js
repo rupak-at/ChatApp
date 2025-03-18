@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { HiMiniChatBubbleBottomCenter } from "react-icons/hi2";
 import { FaUserGroup } from "react-icons/fa6";
@@ -12,16 +12,41 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const NavBar = () => {
+  const userInfo = useSelector((state)=> state.userInfo.userInfo)
   const navItems = [
     { path: "/message/chat", icon: <HiMiniChatBubbleBottomCenter size={32} /> },
     { path: "/message/group", icon: <FaUserGroup size={32} /> },
   ];
   const pathName = usePathname();
+  const router = useRouter();
 
-  const handleLogout = ()=>{
-    console.log('Logout Request')
+  const handleLogout = async ()=>{
+    try {
+      const res = await axios.post('http://localhost:4000/logout',{} ,{withCredentials: true})
+      
+      if (res.status === 200) {
+        toast.success(res.data?.message)
+        router.push('/login')
+      }
+      
+    } catch (error) {
+      const {message} = error.response?.data
+      console.log(error)
+      if (error.response) {
+        if (error.response.status === 500) { 
+          toast.error(message)
+        } 
+        if(error.response.status === 401){ 
+          console.log(message) 
+          toast.error(message)
+        }
+      }
+    }
   }
 
 
@@ -47,7 +72,7 @@ const NavBar = () => {
         <Popover className=''>
           <PopoverTrigger asChild>
               <Image
-                src={"https://randomuser.me/api/portraits/men/25.jpg"}
+                src={userInfo?.avatar || null}
                 height={30}
                 width={30}
                 alt="Profile_Image"
@@ -57,9 +82,9 @@ const NavBar = () => {
           <PopoverContent className="w-80 bg-zinc-700  border-zinc-900">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <h4 className="font-medium leading-none text-slate-200">@rujeshrohan</h4>
+                <h4 className="font-medium leading-none text-slate-200">{userInfo.username}</h4>
                 <p className="text-sm text-zinc-400">
-                  rojexh@gmail.com
+                  {userInfo.email}
                 </p>
               </div>
               <div className="grid gap-2">
