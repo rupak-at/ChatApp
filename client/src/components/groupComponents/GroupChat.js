@@ -39,7 +39,7 @@ const GroupChat = ({ selectGroup }) => {
                     width={64}
                     height={64}
                     alt="Friend Image"
-                    className="rounded-full object-cover h-16 w-16"
+                    className="rounded-full object-cover"
                   />
                 ) : (
                   <span className="text-2xl text-gray-300">👤</span>

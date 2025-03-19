@@ -1,4 +1,5 @@
 import { FriendRequest } from "../model/friendRequestModel.js";
+import { IndividualChat } from "../model/singleChatModel.js";
 import { User } from "../model/userModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -216,14 +217,12 @@ const getMyProfile = async (req, res) => {
       avatar: f.avatar,
     }));
 
-    return res
-      .status(200)
-      .json({
-        message: "User Profile",
-        user,
-        Friends: formattedFriends,
-        TotalFriends: formattedFriends.length,
-      });
+    return res.status(200).json({
+      message: "User Profile",
+      user,
+      Friends: formattedFriends,
+      TotalFriends: formattedFriends.length,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
@@ -264,6 +263,29 @@ const updatePassword = async (req, res) => {
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
+
+const getAllFriendsWithChatId = async (req, res) => {
+  try {
+    const friendList = await IndividualChat.find({
+      participants: req.userID,
+    }).populate({
+      path: "participants",
+      select: "-password -refreshToken",
+    });
+
+    const formattedData = friendList.map((f) => {
+      return {
+        chatId: f._id,
+        friend: f.participants.find((p) => p._id.toString() !== req.userID),
+      };
+    });
+
+    return res.status(200).json({ message: "Friends", Friends: formattedData });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
 export {
   registerUser,
   loginUser,
@@ -273,4 +295,5 @@ export {
   deleteUser,
   getMyProfile,
   updatePassword,
+  getAllFriendsWithChatId,
 };

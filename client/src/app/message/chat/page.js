@@ -3,6 +3,7 @@ import FriendChat from '@/components/friendComponents/FriendChat'
 import FriendList from '@/components/friendComponents/FriendList'
 import FriendListHeader from '@/components/friendComponents/FriendListHeader'
 import React, { useState } from 'react'
+import { set } from 'react-hook-form'
 
 
 
@@ -10,9 +11,11 @@ const Chat = () => {
 
   const [selectedFriend, setSelectedFriend] = useState(null)
   const [searchFriend, setSearchFriend] = useState('')
+  const [chatId, setChatId] = useState('')
 
-  const handleFriendSelected = (friend) => {
+  const handleFriendSelected = (friend, chatId) => {
     setSelectedFriend(friend)
+    setChatId(chatId)
   }
   console.log(searchFriend);
   return (
@@ -26,7 +29,7 @@ const Chat = () => {
         </div>
       </div>
       <div className='w-[calc(100vw-464px)] fixed top-0 right-0'>
-        <FriendChat friend={selectedFriend} />
+        <FriendChat friend={selectedFriend}  chatId={chatId} />
       </div>
     </div>
   )

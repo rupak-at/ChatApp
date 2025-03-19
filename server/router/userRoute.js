@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   deleteUser,
+  getAllFriendsWithChatId,
   getMyProfile,
   loginUser,
   logoutUser,
@@ -16,11 +17,13 @@ const app = Router();
 
 app.post("/register", upload.single("avatar"), registerUser);
 app.post("/login", loginUser);
-app.post("/logout", verifyLogin, logoutUser);
-app.post("/updateAvatar", verifyLogin, upload.single("avatar"), updateAvatar);
-app.post("/updateUserName", verifyLogin, updateUserName);
-app.delete("/deleteUser", verifyLogin, deleteUser);
-app.get("/getMyProfile", verifyLogin, getMyProfile);
-app.post("/updatePassword", verifyLogin, updatePassword);
+app.use(verifyLogin);
+app.post("/logout", logoutUser);
+app.post("/updateAvatar", upload.single("avatar"), updateAvatar);
+app.post("/updateUserName", updateUserName);
+app.delete("/deleteUser", deleteUser);
+app.get("/getMyProfile", getMyProfile);
+app.post("/updatePassword", updatePassword);
+app.get("/friend", getAllFriendsWithChatId);
 
 export default app;

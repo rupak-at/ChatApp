@@ -1,23 +1,56 @@
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoCall } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
-import { BsFillInfoCircleFill } from "react-icons/bs";
-import { Button } from "@/components/ui/button";
+import axios from "axios";
+import UserInfoPopOver from "../UserInfoPopOver";
+import toast from "react-hot-toast";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-const FriendChat = ({ friend }) => {
-  const handleMessageSent = (e) => {
+const FriendChat = ({ friend, chatId }) => {
+  const messageConatinerRef = useRef();
+  const [messages, setMessages] = useState([]);
+  const handleMessageSent = async (e) => {
     e.preventDefault();
     const message = e.target.message.value;
+    try {
+      const res = await axios.post(
+        `http://localhost:4000/user/message/${chatId}`,
+        { content: message },
+        { withCredentials: true }
+      );
+      setMessages([...messages, res.data.sendMessage])
+      
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
     console.log(message);
   };
+
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:4000/user/myMessages/${chatId}`,
+          { withCredentials: true }
+        );
+        console.log(res.data.messages);
+        setMessages(res.data.messages);
+      } catch (error) {
+        setMessages([]);
+        console.log(error.response.data.message);
+      }
+    };
+    getMessages();
+  }, [chatId]);
+
+  // scroll to bottom to new message
+  useEffect(() => {
+    if (messageConatinerRef.current) {
+      messageConatinerRef.current.scrollTop =
+        messageConatinerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   if (!friend) {
     return (
@@ -26,6 +59,7 @@ const FriendChat = ({ friend }) => {
       </div>
     );
   }
+
   return (
     <>
       <div className="flex flex-col h-screen w-full font-sans bg-gray-900 text-white">
@@ -34,9 +68,9 @@ const FriendChat = ({ friend }) => {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="w-16 h-16 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-                {friend?.image && friend.image !== "" ? (
+                {friend?.avatar && friend.avatar !== "" ? (
                   <Image
-                    src={friend.image}
+                    src={friend.avatar}
                     width={64}
                     height={64}
                     alt="Friend Image"
@@ -48,12 +82,12 @@ const FriendChat = ({ friend }) => {
               </div>
               <span
                 className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
-                  friend?.isActive ? "bg-green-500" : "bg-gray-500"
+                  friend?.isOnline ? "bg-green-500" : "bg-gray-500"
                 } absolute bottom-1 right-1`}
               ></span>
             </div>
             <div className="text-2xl font-semibold text-gray-100">
-              {friend?.userName || "Unknown User"}
+              {friend?.username || "Unknown User"}
             </div>
           </div>
           <div className="flex gap-2 items-center">
@@ -70,59 +104,40 @@ const FriendChat = ({ friend }) => {
               />
             </button>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button className="bg-gray-800 border-none">
-                  {" "}
-                  <BsFillInfoCircleFill
-                    size={23}
-                    className="text-zinc-200  transition-all duration-200"
-                  />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-zinc-700  border-zinc-900">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Image
-                      src={friend.image}
-                      height={50}
-                      width={50}
-                      alt="Profile_image"
-                      className="h-16 w-16 rounded-full border-gray-200"
-                    />
-                    <div className="w-full border"></div>
-                    <h4 className="font-medium leading-none text-white ">
-                      {friend.userName}
-                    </h4>
-                    <p className="text-sm text-zinc-400">
-                      {friend.email}
-                    </p>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <UserInfoPopOver friend={friend} />
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto bg-gray-800 p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700">
+        <div
+          ref={messageConatinerRef}
+          className="flex-grow overflow-y-auto bg-gray-800 p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700"
+        >
           <div className="flex flex-col gap-4">
-            {/* Example Chat Message */}
-            <div className="flex justify-start">
-              <div className="max-w-[70%] bg-gray-700 p-3 rounded-lg rounded-bl-none text-gray-100">
-                <p>Hello! How are you?</p>
-                <span className="text-xs text-gray-400 block mt-1">
-                  10:15 AM
-                </span>
+            {messages.length > 0 ? (
+              messages?.map((message, id) => (
+                <div
+                  key={id}
+                  className={`flex justify-${
+                    message.sender === "You" ? "end" : "start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[70%]  p-3 rounded-lg rounded-bl-none text-gray-100 ${
+                      message.sender === "You" ? "bg-gray-700" : "bg-purple-600"
+                    }`}
+                  >
+                    <p>{message.content}</p>
+                    <span className="text-xs text-gray-400 block mt-1">
+                      {new Date(message.createdAt).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-white">
+                Start Your Converstion
               </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="max-w-[70%] bg-purple-600 p-3 rounded-lg rounded-br-none text-gray-100">
-                <p>I'm good, thanks! How about you?</p>
-                <span className="text-xs text-gray-300 block mt-1">
-                  10:16 AM
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

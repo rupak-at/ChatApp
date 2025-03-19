@@ -58,4 +58,43 @@ const disconnectFriend = async (req, res) => {
   }
 };
 
-export { getMyMessages, disconnectFriend };
+const sendMessage = async (req, res) => {
+  try {
+    
+    const {chatId} = req.params
+
+    if (!mongoose.isValidObjectId(chatId)) {
+      return res.status(400).json({message: "Invalid Friend ID"})
+    }
+
+    const friend = await IndividualChat.findById(chatId)
+    if (!friend) {
+      return res.status(404).json({message: "Friend Not Found"})
+    }
+
+    if (!friend.participants.includes(req.userID)) {
+      return res.status(401).json({message: "You Are Not In The Friend List"})
+    }
+
+    const message = await Message.create({
+      sender: req.userID,
+      content: req.body.content,
+      chatId,
+      chatType: "IndividualChat"
+    })
+
+    const formattedMessage = {
+      sender: "You",
+      content: message.content,
+      createdAt: message.createdAt,
+    };
+
+    return res.status(200).json({message: "Message Sent Successfully", sendMessage: formattedMessage})
+    
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: "Internal Failure"})
+  }
+};
+
+export { getMyMessages, disconnectFriend, sendMessage };
