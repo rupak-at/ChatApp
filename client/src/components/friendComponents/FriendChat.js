@@ -12,14 +12,14 @@ const FriendChat = ({ friend, chatId }) => {
   const [messages, setMessages] = useState([]);
   const handleMessageSent = async (e) => {
     e.preventDefault();
-    const message = e.target.message.value;
+    const message = e.target.value;
     try {
       const res = await axios.post(
         `http://localhost:4000/user/message/${chatId}`,
         { content: message },
         { withCredentials: true }
       );
-      e.target.message.value = "";
+      e.target.value = "";
       setMessages([...messages, res.data.sendMessage]);
     } catch (error) {
       toast.error(error.response.data.message);
@@ -121,8 +121,19 @@ const FriendChat = ({ friend, chatId }) => {
                     message.sender === "You" ? "end" : "start"
                   }`}
                 >
+                  {message.sender !== "You" && (
+                    <div className="flex mt-5 mr-1">
+                      <img
+                        src={message.avatar}
+                        alt="image"
+                        className=" h-8 w-8 rounded-full"
+                      />
+                    </div>
+                  )}
                   <div
-                    className={`max-w-[70%]  p-3 rounded-lg rounded-${message.sender === "You" ? "br" : "bl"}-none text-gray-100 ${
+                    className={`max-w-[70%]  px-2 py-1 rounded-lg rounded-${
+                      message.sender === "You" ? "br" : "bl"
+                    }-none text-gray-100 ${
                       message.sender === "You" ? "bg-gray-700" : "bg-purple-600"
                     }`}
                   >
@@ -151,6 +162,12 @@ const FriendChat = ({ friend, chatId }) => {
               name="message"
               placeholder="Type a message..."
               className="flex-grow h-12 px-4 py-2 rounded-xl text-lg text-gray-100 bg-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none border border-gray-600 resize-none scrollbar-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleMessageSent(e);
+                }
+              }}
             ></textarea>
             <button
               type="submit"

@@ -79,11 +79,7 @@ const acceptRequest = async (req, res) => {
 const rejectRequest = async (req, res) => {
   try {
 
-    const {requestId} = req.body
-
-    if (!requestId) {
-      return res.status(400).json({message: 'All Field Are Required'})
-    }
+    const requestId = req.params.id
 
     if (!mongoose.isValidObjectId(requestId)) {
       return res.status(404).json({message: 'Request Not Found'})

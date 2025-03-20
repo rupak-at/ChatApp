@@ -18,6 +18,7 @@ const getMyMessages = async (req, res) => {
     const formattedMessages = messages.map(
       ({ sender, content, createdAt }) => ({
         sender: sender._id.toString() === req.userID ? "You" : sender.username,
+        avatar: sender.avatar,
         content,
         createdAt,
       })

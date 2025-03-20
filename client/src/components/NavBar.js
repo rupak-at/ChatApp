@@ -20,11 +20,20 @@ import { Bell, Search } from "lucide-react";
 
 const NavBar = () => {
   const userInfo = useSelector((state) => state.userInfo.userInfo);
+  const notificationNumber = useSelector((state)=> state.notification.notificationNumber);
   const navItems = [
-    { path: "/kurakani/chat", icon: <HiMiniChatBubbleBottomCenter size={32} /> },
-    { path: "/kurakani/group", icon: <FaUserGroup size={32} /> },
-    { path: "/kurakani/search", icon: <Search size={32} /> },
-    { path: "/kurakani/notification", icon: <Bell size={32} />}
+    {
+      path: "/kurakani/chat",
+      icon: <HiMiniChatBubbleBottomCenter size={32} />,
+      name: "chat",
+    },
+    { path: "/kurakani/group", icon: <FaUserGroup size={32} />, name: "group" },
+    { path: "/kurakani/search", icon: <Search size={32} />, name: "search" },
+    {
+      path: "/kurakani/notification",
+      icon: <Bell size={32} />,
+      name: "notification",
+    },
   ];
   const pathName = usePathname();
   const router = useRouter();
@@ -63,13 +72,20 @@ const NavBar = () => {
           <Link
             key={id}
             href={nav.path}
-            className={`p-3 rounded-md flex justify-center items-center transition-all ${
+            className={`p-3 rounded-md flex justify-center items-center transition-all relative ${
               pathName === nav.path
                 ? "bg-gray-700 text-purple-500"
                 : "text-gray-300 hover:bg-gray-700 hover:text-slate-300"
             }`}
           >
-            {nav.icon}
+            <div className="relative">
+              {nav.icon}
+              {nav.name === "notification" && notificationNumber !==0 && (
+                <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
+                  {notificationNumber}
+                </span>
+              )}
+            </div>
           </Link>
         ))}
       </div>
@@ -118,5 +134,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
-

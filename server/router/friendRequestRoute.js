@@ -12,7 +12,7 @@ const app = Router();
 app.use(verifyLogin);
 app.post("/sendRequest/:id", sendRequest);
 app.post("/acceptRequest/:id", acceptRequest);
-app.post("/rejectRequest", rejectRequest);
+app.post("/rejectRequest/:id", rejectRequest);
 app.get("/allrequest", getAllRequest);
 
 export default app;
