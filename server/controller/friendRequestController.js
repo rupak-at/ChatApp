@@ -5,7 +5,7 @@ import { IndividualChat } from "../model/singleChatModel.js"
 const sendRequest = async(req, res) => {
   try {
 
-    const {receiverId} = req.body
+    const receiverId = req.params.id
 
     if (!receiverId) {
       return res.status(400).json({message: 'All Field Are Required'})
@@ -42,7 +42,7 @@ const sendRequest = async(req, res) => {
 const acceptRequest = async (req, res) => {
   try {
 
-    const {requestId} = req.body
+    const requestId = req.params.id
 
     if (!requestId) {
       return res.status(400).json({message: 'All Field Are Required'})
@@ -104,4 +104,37 @@ const rejectRequest = async (req, res) => {
   }
 }  
 
-export {sendRequest, acceptRequest, rejectRequest}
+const getAllRequest = async (req, res) => {
+  try {
+    const request = await FriendRequest.find({
+      $and: [
+        { receiver: req.userID },
+        { status: 'pending' },
+      ],
+    }).populate({
+      path: "sender",
+      select: "-password -refreshToken"
+    });
+    
+    const formattedData = request.map((f)=>{
+      return {
+        requestId: f._id,
+        sender: {
+          _id: f.sender._id,
+          username: f.sender.username,
+          email: f.sender.email,
+          isOnline: f.sender.isOnline,
+          avatar: f.sender.avatar
+        }
+      }
+    })
+    
+    return res.status(200).json({message: "All Friend Request", request: formattedData})
+    
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: "Internal Server Failure"})
+  }
+}
+
+export {sendRequest, acceptRequest, rejectRequest, getAllRequest}

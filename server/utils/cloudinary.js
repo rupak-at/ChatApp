@@ -14,6 +14,10 @@ const uploadOnCloudinary = async (localFilePath) => {
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
             resource_type: 'auto', 
             folder: 'avatars',
+            height: 796,
+            width: 1280,
+            crop: "fill",
+            quality: "auto",
         });
 
         // Optimize delivery by resizing and applying auto-format and auto-quality

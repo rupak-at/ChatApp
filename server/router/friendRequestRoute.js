@@ -1,12 +1,18 @@
 import { Router } from "express";
-import { acceptRequest, rejectRequest, sendRequest } from "../controller/friendRequestController.js";
+import {
+  acceptRequest,
+  getAllRequest,
+  rejectRequest,
+  sendRequest,
+} from "../controller/friendRequestController.js";
 import verifyLogin from "../middleware/authMiddleware.js";
 
-const app = Router()
+const app = Router();
 
+app.use(verifyLogin);
+app.post("/sendRequest/:id", sendRequest);
+app.post("/acceptRequest/:id", acceptRequest);
+app.post("/rejectRequest", rejectRequest);
+app.get("/allrequest", getAllRequest);
 
-app.post('/sendRequest', verifyLogin,sendRequest)
-app.post('/acceptRequest', verifyLogin,acceptRequest)
-app.post('/rejectRequest', verifyLogin,rejectRequest)
-
-export default app
+export default app;

@@ -85,6 +85,7 @@ const loginUser = async (req, res) => {
 
     //saving refreshToken in the DB
     user.refreshToken = refreshToken;
+    user.isOnline = true;
 
     await user.save();
     //sending into the cookie
@@ -114,6 +115,9 @@ const logoutUser = async (req, res) => {
       { $set: { refreshToken: null } },
       { new: true }
     );
+
+    user.isOnline = false;
+    await user.save();
     //removing the cookie
     res.clearCookie("refreshToken", options);
     res.clearCookie("accessToken", options);
@@ -286,6 +290,24 @@ const getAllFriendsWithChatId = async (req, res) => {
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
+
+const getAllUsers = async (req, res) => {
+  try {
+    const {username} = req.query
+
+    const user = await User.find({username: {$regex: username}}).select("-password -refreshToken");
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: "No Users Found" });
+    }
+
+    return res.status(200).json({ message: "Users", user });
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
 export {
   registerUser,
   loginUser,
@@ -296,4 +318,5 @@ export {
   getMyProfile,
   updatePassword,
   getAllFriendsWithChatId,
+  getAllUsers
 };

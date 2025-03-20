@@ -122,7 +122,7 @@ const FriendChat = ({ friend, chatId }) => {
                   }`}
                 >
                   <div
-                    className={`max-w-[70%]  p-3 rounded-lg rounded-bl-none text-gray-100 ${
+                    className={`max-w-[70%]  p-3 rounded-lg rounded-${message.sender === "You" ? "br" : "bl"}-none text-gray-100 ${
                       message.sender === "You" ? "bg-gray-700" : "bg-purple-600"
                     }`}
                   >
