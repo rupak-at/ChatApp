@@ -19,8 +19,8 @@ const FriendChat = ({ friend, chatId }) => {
         { content: message },
         { withCredentials: true }
       );
-      setMessages([...messages, res.data.sendMessage])
-      
+      e.target.message.value = "";
+      setMessages([...messages, res.data.sendMessage]);
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -128,7 +128,10 @@ const FriendChat = ({ friend, chatId }) => {
                   >
                     <p>{message.content}</p>
                     <span className="text-xs text-gray-400 block mt-1">
-                      {new Date(message.createdAt).toLocaleTimeString()}
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
                     </span>
                   </div>
                 </div>

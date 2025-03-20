@@ -21,10 +21,17 @@ const UserUpdateDetails = () => {
   const router = useRouter();
   const [avatarFile, setAvatarFile] = useState(null);
   const userInfo = useSelector((state) => state.userInfo.userInfo);
+  //different userForm for account and password so that they can be validated separately
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
+    register: registerAccount,
+    handleSubmit: handleAccountSubmit,
+    formState: { errors: errorsAccount, isSubmitting: isSubmittingAccount },
+  } = useForm();
+
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    formState: { errors: errorsPassword, isSubmitting: isSubmittingPassword },
   } = useForm();
 
   const handleUser = async (data) => {
@@ -97,7 +104,7 @@ const UserUpdateDetails = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(handleUser)} className="space-y-2">
+            <form onSubmit={handleAccountSubmit(handleUser)} className="space-y-2">
               <div className="space-y-1">
                 <Input
                   value={userInfo.email}
@@ -107,7 +114,7 @@ const UserUpdateDetails = () => {
               </div>
               <div className="space-y-1">
                 <Input
-                  {...register("username")}
+                  {...registerAccount("username")}
                   defaultValue={userInfo.username}
                   placeholder={"Username"}
                   className={"outline-none focus:border-none"}
@@ -123,12 +130,12 @@ const UserUpdateDetails = () => {
               </div>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmittingAccount}
                 className={
                   "bg-indigo-950 text-slate-100 hover:text-slate-300 transition-all duration-200 hover:bg-indigo-950"
                 }
               >
-                {isSubmitting ? (
+                {isSubmittingAccount ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
@@ -150,38 +157,38 @@ const UserUpdateDetails = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(handlePassword)} className="space-y-2">
+            <form onSubmit={handlePasswordSubmit(handlePassword)} className="space-y-2">
               <div className="space-y-1">
                 <Input
-                  {...register("oldPassword")}
+                  {...registerPassword("oldPassword")}
                   type="password"
                   placeholder={"Current password"}
                 />
               </div>
               <div className="space-y-1">
                 <Input
-                  {...register("newPassword", {
-                    required: "Password is required",
+                  {...registerPassword("newPassword", {
+                    required: "New password is required",
                     minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
+                      value: 6,
+                      message: "Password must be at least 6 characters",
                     },
-                  })}
+                  } )}
                   type="password"
                   placeholder={"New password"}
                 />
                 <div className="text-red-500 text-sm ml-1">
-                  {errors.newPassword?.message}
+                  {errorsPassword.newPassword?.message}
                 </div>
               </div>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmittingPassword}
                 className={
                   "bg-indigo-950 text-slate-100 hover:text-slate-300 transition-all duration-200 hover:bg-indigo-950"
                 }
               >
-                {isSubmitting ? (
+                {isSubmittingPassword ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
