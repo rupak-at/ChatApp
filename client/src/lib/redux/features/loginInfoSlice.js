@@ -2,12 +2,7 @@ const { createSlice } = require("@reduxjs/toolkit");
 
 
 const initialState = {
-    userInfo: {
-        username: "",
-        email: "",
-        _id: "",
-        avatar: "",
-    },    
+    userInfo: {},    
 };
 
 const loginInfoSlice = createSlice({
@@ -18,12 +13,7 @@ const loginInfoSlice = createSlice({
             state.userInfo = action.payload
         }, 
         removeUserInfo : (state)=>{
-            state.userInfo = {
-                username: "",
-                email: "",
-                _id: "",
-                avatar: "",
-            }
+            state.userInfo = {}
         }
     }
 })

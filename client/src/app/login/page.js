@@ -1,5 +1,5 @@
 "use client";
-import { loadUserInfo } from "@/components/reduxFeatures/loginInfoSlice";
+import { loadUserInfo } from "@/lib/redux/features/loginInfoSlice";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

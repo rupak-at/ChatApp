@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/popover";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import UpdateInfo from "./UpdateInfo";
 import { Bell, Search } from "lucide-react";
+import { removeUserInfo } from "@/lib/redux/features/loginInfoSlice";
 
 const NavBar = () => {
   const userInfo = useSelector((state) => state.userInfo.userInfo);
+  const dispatch = useDispatch();
   const notificationNumber = useSelector((state)=> state.notification.notificationNumber);
   const navItems = [
     {
@@ -48,6 +50,7 @@ const NavBar = () => {
 
       if (res.status === 200) {
         toast.success(res.data?.message);
+        dispatch(removeUserInfo());
         router.push("/login");
       }
     } catch (error) {

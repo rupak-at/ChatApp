@@ -1,6 +1,6 @@
 "use client";
 import RequestNotification from "@/components/notification-request/RequestNotification";
-import { setNotificationNumber } from "@/components/reduxFeatures/notificationSlice";
+import { setNotificationNumber } from "@/lib/redux/features/notificationSlice";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
