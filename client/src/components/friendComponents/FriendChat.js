@@ -100,15 +100,15 @@ const FriendChat = ({ friend, chatId }) => {
     <>
       <div className="flex flex-col h-screen w-full font-sans bg-gray-900 text-white">
         {/* Chat Header */}
-        <div className="flex justify-between items-center bg-gray-800 px-6 py-4 shadow-lg border-b border-gray-700">
+        <div className="flex justify-between items-center bg-gray-800/95 backdrop-blur-sm px-6 py-3 shadow-lg border-b border-gray-700 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
                 {friend?.avatar && friend.avatar !== "" ? (
                   <Image
                     src={friend.avatar}
-                    width={64}
-                    height={64}
+                    width={48}
+                    height={48}
                     alt="Friend Image"
                     className="rounded-full object-cover"
                   />
@@ -119,36 +119,42 @@ const FriendChat = ({ friend, chatId }) => {
               <span
                 className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
                   friend?.isOnline ? "bg-green-500" : "bg-gray-500"
-                } absolute bottom-1 right-1`}
+                } absolute bottom-0 right-0`}
               ></span>
             </div>
-            <div className="text-2xl font-semibold text-gray-100">
-              {friend?.username || "Unknown User"}
+            <div className="flex flex-col">
+              <div className="text-lg font-semibold text-gray-100">
+                {friend?.username || "Unknown User"}
+              </div>
+              <div className="text-xs text-gray-400">
+                {friend?.isOnline ? "Online" : "Offline"}
+              </div>
             </div>
           </div>
           <div className="flex gap-2 items-center">
-            <button className="px-3 py-2 rounded-md hover:bg-primary/90 transition flex justify-center items-center">
+            <button className="p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center">
               <IoCall
-                size={22}
-                className="text-zinc-200  transition-all duration-200"
+                size={20}
+                className="group-hover:text-purple-400 transition-all duration-200"
               />
             </button>
-            <button className="px-3 py-2 rounded-md hover:bg-primary/90 transition flex justify-center items-center">
+            <button className="p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center group">
               <FaVideo
-                size={22}
+                size={20}
                 className="text-zinc-200  transition-all duration-200"
               />
             </button>
-
-            <UserInfoPopOver friend={friend} />
+            <div className="h-6 border-l border-gray-600 mx-1 flex items-center">
+              <UserInfoPopOver friend={friend} />
+            </div>
           </div>
         </div>
 
         <div
           ref={messageConatinerRef}
-          className="flex-grow overflow-y-auto bg-gray-800 p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700"
+          className="flex-grow overflow-y-auto bg-gray-900 p-2 md:p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800"
         >
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
             {messages.length > 0 ? (
               messages?.map((message, id) => (
                 <div
@@ -158,7 +164,7 @@ const FriendChat = ({ friend, chatId }) => {
                   }`}
                 >
                   {message.senderId !== userInfo._id && (
-                    <div className="flex mt-5 mr-1">
+                    <div className="self-end mt-5 mr-2">
                       <img
                         src={message.avatar}
                         alt="image"
@@ -171,12 +177,18 @@ const FriendChat = ({ friend, chatId }) => {
                       message.senderId === userInfo._id ? "br" : "bl"
                     }-none text-gray-100 ${
                       message.senderId === userInfo._id
-                        ? "bg-gray-700"
-                        : "bg-purple-600"
+                        ? "bg-purple-600 text-white"
+                        : "bg-gray-700 border border-gray-600"
                     }`}
                   >
-                    <p>{message.content}</p>
-                    <span className="text-xs text-gray-400 block mt-1">
+                    <p className="break-words">{message.content}</p>
+                    <span
+                      className={`text-[11px] opacity-60 block mt-1 ${
+                        message.senderId !== userInfo._id
+                          ? "text-right"
+                          : "text-left"
+                      }`}
+                    >
                       {new Date(message.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",

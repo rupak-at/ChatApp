@@ -67,27 +67,33 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   }
 
   return (
-    <div className="bg-gray-900 w-96 h-screen font-sans border-r shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-      <div className="flex flex-col">
+    <div className="bg-gray-900 w-96 h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+      <div className="sticky top-0 bg-gray-900 p-3 border-b border-gray-800">
+        <h2 className="text-xl font-semibold text-gray-100 px-2">
+          Conversations
+        </h2>
+      </div>
+
+      <div className="flex flex-col py-2">
         {searchedFriends.map(({ friend, chatId }) => (
           <div
             onClick={() => onClickFriend(friend, chatId)}
             key={friend._id}
-            className={`flex items-center gap-4 p-4 cursor-pointer transition-all ${
+            className={`flex items-center gap-3 mx-2 p-3 rounded-lg cursor-pointer transition-all ${
               chattingFriend?._id === friend?._id
-                ? "bg-gray-800 border-l-4 border-purple-500"
-                : "bg-gray-900 hover:bg-gray-800"
+                ? "bg-gray-950 border-b-2 border-purple-500"
+                : "bg-gray-900 hover:bg-gray-800 hover:border-b-2 hover:border-purple-400"
             }`}
           >
             {/* Friend's Image */}
             <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-white flex items-center justify-center overflow-hidden shadow-md">
                 {friend.avatar ? (
                   <Image
                     src={friend.avatar}
-                    height={56}
-                    width={56}
-                    alt="Friend's Image"
+                    height={48}
+                    width={48}
+                    alt={`${friend.username}'s avatar`}
                     className="rounded-full object-cover h-16 w-16"
                   />
                 ) : (
@@ -96,20 +102,20 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
               </div>
               {/* Active Status Indicator */}
               <span
-                className={`h-3 w-3 border-2 border-gray-900 rounded-full absolute ${
-                  friend.isOnline ? "bg-green-500" : "bg-gray-500"
-                } bottom-1 right-1`}
+                className={`h-3 w-3 rounded-full absolute border border-gray-900 ${
+                  friend.isOnline ? "bg-green-500" : "bg-gray-400"
+                } bottom-0 right-1 transform translate-x-1`}
               ></span>
             </div>
 
             {/* Friend's Name */}
-            <div className="flex flex-col gap-1">
-              <div className="text-lg font-medium text-gray-100">
+            <div className="flex flex-col flex-1 gap-0.5 truncate">
+              <div className="text-base font-medium text-gray-100 truncate">
                 {friend.username}
               </div>
-              {/* <div className="text-sm text-gray-400 truncate max-w-[200px]">
-                {friend.lastMessage || "No messages yet"}
-              </div> */}
+              <div className="text-xs text-gray-400 truncate max-w-full">
+                {friend.lastMessage || "Start a conversation"}
+              </div>
             </div>
           </div>
         ))}
