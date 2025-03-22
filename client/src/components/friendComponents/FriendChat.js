@@ -6,10 +6,47 @@ import { IoSend } from "react-icons/io5";
 import axios from "axios";
 import UserInfoPopOver from "../UserInfoPopOver";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
+import { useSelector } from "react-redux";
 
 const FriendChat = ({ friend, chatId }) => {
+  const userInfo = useSelector((state) => state.userInfo.userInfo);
   const messageConatinerRef = useRef();
   const [messages, setMessages] = useState([]);
+  const [socket, setSocket] = useState(null);
+
+  //make io connection
+  useEffect(() => {
+    const newSocket = io("http://localhost:4000", {
+      withCredentials: true,
+    });
+
+    setSocket(newSocket);
+
+    return () => newSocket.disconnect();
+  }, []);
+  //join chat room
+  useEffect(() => {
+    if (socket && chatId) {
+      socket.emit("join-chat", chatId);
+    }
+  }, [socket, chatId]);
+
+  //listen for incoming messages
+  useEffect(() => {
+    if (socket) {
+      socket.on("receive-message", (message) => {
+        setMessages((prev) => [...prev, message]);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("receive-message");
+      }
+    };
+  }, [socket]);
+
   const handleMessageSent = async (e) => {
     e.preventDefault();
     const message = e.target.value;
@@ -24,7 +61,6 @@ const FriendChat = ({ friend, chatId }) => {
     } catch (error) {
       toast.error(error.response.data.message);
     }
-    console.log(message);
   };
 
   useEffect(() => {
@@ -118,10 +154,10 @@ const FriendChat = ({ friend, chatId }) => {
                 <div
                   key={id}
                   className={`flex justify-${
-                    message.sender === "You" ? "end" : "start"
+                    message?.senderId === userInfo?._id ? "end" : "start"
                   }`}
                 >
-                  {message.sender !== "You" && (
+                  {message.senderId !== userInfo._id && (
                     <div className="flex mt-5 mr-1">
                       <img
                         src={message.avatar}
@@ -132,9 +168,11 @@ const FriendChat = ({ friend, chatId }) => {
                   )}
                   <div
                     className={`max-w-[70%]  px-2 py-1 rounded-lg rounded-${
-                      message.sender === "You" ? "br" : "bl"
+                      message.senderId === userInfo._id ? "br" : "bl"
                     }-none text-gray-100 ${
-                      message.sender === "You" ? "bg-gray-700" : "bg-purple-600"
+                      message.senderId === userInfo._id
+                        ? "bg-gray-700"
+                        : "bg-purple-600"
                     }`}
                   >
                     <p>{message.content}</p>

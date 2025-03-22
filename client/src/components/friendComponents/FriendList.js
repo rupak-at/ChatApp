@@ -1,18 +1,25 @@
 "use client";
+import {
+  setFriendList,
+  updateFriendOnlineStatus,
+} from "@/lib/redux/features/friendListSlice";
 import axios from "axios";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { io } from "socket.io-client";
 
 const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
-
-  const [friendLists, setFriendLists] = useState(null);
+  const dispatch = useDispatch();
+  const friends = useSelector((state) => state.friendList.friendList);
+  const [socket, setSocket] = useState(null);
   useEffect(() => {
     const getFriends = async () => {
       try {
         const res = await axios.get("http://localhost:4000/friend", {
           withCredentials: true,
         });
-        setFriendLists(res.data.Friends);
+        dispatch(setFriendList(res.data.Friends));
       } catch (error) {
         console.log(error);
       }
@@ -20,13 +27,38 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
     getFriends();
   }, []);
 
-  const searchedFriends = friendLists?.filter(({ friend }) => {
+  useEffect(() => {
+    const newSocket = io("http://localhost:4000", {
+      withCredentials: true,
+    });
+
+    if (newSocket) {
+      setSocket(newSocket);
+    }
+    return () => newSocket.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("user-online", (userId) => {
+        dispatch(updateFriendOnlineStatus({ userId, isOnline: true }));
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("user-online");
+      }
+    };
+  }, [socket]);
+
+  const searchedFriends = friends?.filter(({ friend }) => {
     if (friend.username.toLowerCase().includes(searchFriend.toLowerCase())) {
       return friend;
     }
   });
 
-  if (friendLists === null) {
+  if (friends === null) {
     return (
       <div className="bg-gray-900 w-96 h-screen font-sans border-r shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
         <div className="flex flex-col"> </div>

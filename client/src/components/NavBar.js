@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiMiniChatBubbleBottomCenter } from "react-icons/hi2";
 import { FaUserGroup } from "react-icons/fa6";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,21 @@ import { useDispatch, useSelector } from "react-redux";
 import UpdateInfo from "./UpdateInfo";
 import { Bell, Search } from "lucide-react";
 import { removeUserInfo } from "@/lib/redux/features/loginInfoSlice";
+import { setNotificationNumber } from "@/lib/redux/features/notificationSlice";
+import { setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
+import { io } from "socket.io-client";
+import {
+  removeFriendList,
+  updateFriendOnlineStatus,
+} from "@/lib/redux/features/friendListSlice";
 
 const NavBar = () => {
   const userInfo = useSelector((state) => state.userInfo.userInfo);
   const dispatch = useDispatch();
-  const notificationNumber = useSelector((state)=> state.notification.notificationNumber);
+  const notificationNumber = useSelector(
+    (state) => state.notification.notificationNumber
+  );
+  const [socket, setSocket] = useState(null);
   const navItems = [
     {
       path: "/kurakani/chat",
@@ -39,9 +49,46 @@ const NavBar = () => {
   ];
   const pathName = usePathname();
   const router = useRouter();
+  useEffect(() => {
+    const getAllRequest = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:4000/request/allrequest`,
+          { withCredentials: true }
+        );
+        setFriendRequest(res.data.request);
+        dispatch(setFriendRequestDetails(res.data.request));
+        dispatch(setNotificationNumber(res.data.request.length));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAllRequest();
+  }, []);
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:4000", { withCredentials: true });
+
+    if (newSocket) {
+      setSocket(newSocket);
+    }
+
+    return () => newSocket.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("user-offline", (userId) => {
+        dispatch(updateFriendOnlineStatus({ userId, isOnline: false }));
+      });
+    }
+  }, [socket]);
 
   const handleLogout = async () => {
     try {
+      if (socket) {
+        socket.emit("logout", userInfo._id);
+      }
       const res = await axios.post(
         "http://localhost:4000/logout",
         {},
@@ -51,6 +98,7 @@ const NavBar = () => {
       if (res.status === 200) {
         toast.success(res.data?.message);
         dispatch(removeUserInfo());
+        dispatch(removeFriendList());
         router.push("/login");
       }
     } catch (error) {
@@ -83,7 +131,7 @@ const NavBar = () => {
           >
             <div className="relative">
               {nav.icon}
-              {nav.name === "notification" && notificationNumber !==0 && (
+              {nav.name === "notification" && notificationNumber !== 0 && (
                 <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
                   {notificationNumber}
                 </span>

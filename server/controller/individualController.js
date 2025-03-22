@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Message } from "../model/messageModel.js";
 import { IndividualChat } from "../model/singleChatModel.js";
+import { User } from "../model/userModel.js";
 
 const getMyMessages = async (req, res) => {
   try {
@@ -18,6 +19,7 @@ const getMyMessages = async (req, res) => {
     const formattedMessages = messages.map(
       ({ sender, content, createdAt }) => ({
         sender: sender._id.toString() === req.userID ? "You" : sender.username,
+        senderId: sender._id,
         avatar: sender.avatar,
         content,
         createdAt,
@@ -52,7 +54,9 @@ const disconnectFriend = async (req, res) => {
 
     await friend.deleteOne();
 
-    return res.status(200).json({ message: "Friend Disconnected Successfully" });
+    return res
+      .status(200)
+      .json({ message: "Friend Disconnected Successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
@@ -61,40 +65,51 @@ const disconnectFriend = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   try {
-    
-    const {chatId} = req.params
+    const { chatId } = req.params;
 
     if (!mongoose.isValidObjectId(chatId)) {
-      return res.status(400).json({message: "Invalid Friend ID"})
+      return res.status(400).json({ message: "Invalid Friend ID" });
     }
 
-    const friend = await IndividualChat.findById(chatId)
+    const friend = await IndividualChat.findById(chatId);
     if (!friend) {
-      return res.status(404).json({message: "Friend Not Found"})
+      return res.status(404).json({ message: "Friend Not Found" });
     }
 
     if (!friend.participants.includes(req.userID)) {
-      return res.status(401).json({message: "You Are Not In The Friend List"})
+      return res
+        .status(401)
+        .json({ message: "You Are Not In The Friend List" });
     }
+    const senderUser = await User.findById(req.userID);
 
     const message = await Message.create({
       sender: req.userID,
       content: req.body.content,
       chatId,
-      chatType: "IndividualChat"
-    })
+      chatType: "IndividualChat",
+    });
 
     const formattedMessage = {
-      sender: "You",
+      sender: senderUser.username,
+      senderId: senderUser._id,
+      avatar: senderUser.avatar,
       content: message.content,
       createdAt: message.createdAt,
     };
+    //emit message to chatRoom
+    const io = req.app.get("io");
+    io.to(chatId).emit("receive-message", formattedMessage);
 
-    return res.status(200).json({message: "Message Sent Successfully", sendMessage: formattedMessage})
-    
+    return res
+      .status(200)
+      .json({
+        message: "Message Sent Successfully",
+        sendMessage: formattedMessage,
+      });
   } catch (error) {
-    console.error(error)
-    return res.status(500).json({message: "Internal Failure"})
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
   }
 };
 

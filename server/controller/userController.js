@@ -88,6 +88,9 @@ const loginUser = async (req, res) => {
     user.isOnline = true;
 
     await user.save();
+
+    const io = req.app.get("io");
+    io.emit("user-online", user._id);
     //sending into the cookie
     res.cookie("refreshToken", refreshToken, options);
     res.cookie("accessToken", accessToken, options);
@@ -293,18 +296,19 @@ const getAllFriendsWithChatId = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const {username} = req.query
+    const { username } = req.query;
 
-    const user = await User.find({username: {$regex: username}}).select("-password -refreshToken");
+    const user = await User.find({ username: { $regex: username } }).select(
+      "-password -refreshToken"
+    );
 
     if (user.length === 0) {
       return res.status(404).json({ message: "No Users Found" });
     }
 
     return res.status(200).json({ message: "Users", user });
-    
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
@@ -318,5 +322,5 @@ export {
   getMyProfile,
   updatePassword,
   getAllFriendsWithChatId,
-  getAllUsers
+  getAllUsers,
 };
