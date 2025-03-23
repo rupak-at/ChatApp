@@ -1,5 +1,6 @@
 "use client";
 import {
+  changeFriendListOrder,
   setFriendList,
   updateFriendOnlineStatus,
 } from "@/lib/redux/features/friendListSlice";
@@ -43,18 +44,24 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
       socket.on("user-online", (userId) => {
         dispatch(updateFriendOnlineStatus({ userId, isOnline: true }));
       });
+
+      // socket.on("receive-message", (message) => {
+      //   console.log("indside list receive message: ", message);
+      //   // dispatch(changeFriendListOrder(message?.senderId));
+      // });
     }
 
     return () => {
       if (socket) {
         socket.off("user-online");
+        socket.off("receive-message");
       }
     };
   }, [socket]);
 
-  const searchedFriends = friends?.filter(({ friend }) => {
-    if (friend.username.toLowerCase().includes(searchFriend.toLowerCase())) {
-      return friend;
+  const searchedFriends = friends?.filter((f) => {
+    if (f?.friend.username.toLowerCase().includes(searchFriend.toLowerCase())) {
+      return f;
     }
   });
 
@@ -114,7 +121,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
                 {friend.username}
               </div>
               <div className="text-xs text-gray-400 truncate max-w-full">
-                {friend.lastMessage || "Start a conversation"}
+                {/* {friend.lastMessage || "Start a conversation"} */}
               </div>
             </div>
           </div>

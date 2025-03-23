@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
 
   socket.on("login", (userId) => {
     console.log("User logged in: ", userId);
+    io.emit("user-online", userId);
     onlineUser[userId] = socket.id;
   });
   socket.on("logout", (userId) => {

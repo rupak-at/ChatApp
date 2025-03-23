@@ -3,8 +3,6 @@ import FriendChat from '@/components/friendComponents/FriendChat'
 import FriendList from '@/components/friendComponents/FriendList'
 import FriendListHeader from '@/components/friendComponents/FriendListHeader'
 import React, { useState } from 'react'
-import { set } from 'react-hook-form'
-
 
 
 const Chat = () => {
@@ -17,7 +15,7 @@ const Chat = () => {
     setSelectedFriend(friend)
     setChatId(chatId)
   }
-  console.log(searchFriend);
+
   return (
     <div className='flex h-screen overflow-hidden'>
       <div className='flex flex-col '>

@@ -7,13 +7,19 @@ import axios from "axios";
 import UserInfoPopOver from "../UserInfoPopOver";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { changeFriendListOrder, updateFriendOnlineStatus } from "@/lib/redux/features/friendListSlice";
 
 const FriendChat = ({ friend, chatId }) => {
+  const friends = useSelector((state) => state.friendList.friendList)
   const userInfo = useSelector((state) => state.userInfo.userInfo);
   const messageConatinerRef = useRef();
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
+  const dispatch = useDispatch();
+
+  const selectedFriend = friends.find((f) => f?.friend._id === friend?._id);
+  const isOnline = selectedFriend?.friend.isOnline;
 
   //make io connection
   useEffect(() => {
@@ -37,15 +43,30 @@ const FriendChat = ({ friend, chatId }) => {
     if (socket) {
       socket.on("receive-message", (message) => {
         setMessages((prev) => [...prev, message]);
+        // dispatch(changeFriendListOrder(message.senderId));
+      });
+
+      socket.on("user-online", (userId) => {
+        if (friend?._id === userId) {
+          dispatch(updateFriendOnlineStatus({ userId, isOnline: true }));
+        }
+      });
+
+      socket.on("user-offline", (userId) => {
+        if ( friend?._id === userId) {
+          dispatch(updateFriendOnlineStatus({ userId, isOnline: false }));
+        }
       });
     }
 
     return () => {
       if (socket) {
         socket.off("receive-message");
+        socket.off("user-online");
+        socket.off("user-offline");
       }
     };
-  }, [socket]);
+  }, [socket, friend]);
 
   const handleMessageSent = async (e) => {
     e.preventDefault();
@@ -70,7 +91,6 @@ const FriendChat = ({ friend, chatId }) => {
           `http://localhost:4000/user/myMessages/${chatId}`,
           { withCredentials: true }
         );
-        console.log(res.data.messages);
         setMessages(res.data.messages);
       } catch (error) {
         setMessages([]);
@@ -118,7 +138,7 @@ const FriendChat = ({ friend, chatId }) => {
               </div>
               <span
                 className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
-                  friend?.isOnline ? "bg-green-500" : "bg-gray-500"
+                  isOnline ? "bg-green-500" : "bg-gray-500"
                 } absolute bottom-0 right-0`}
               ></span>
             </div>
@@ -127,7 +147,7 @@ const FriendChat = ({ friend, chatId }) => {
                 {friend?.username || "Unknown User"}
               </div>
               <div className="text-xs text-gray-400">
-                {friend?.isOnline ? "Online" : "Offline"}
+                {isOnline ? "Online" : "Offline"}
               </div>
             </div>
           </div>
