@@ -284,9 +284,12 @@ const getAllFriendsWithChatId = async (req, res) => {
 
     const allMessages = await Message.find({
       chatId: { $in: chatIds }, //gets all documents where chatId is in chatIds []
-    }).select("chatId content sender createdAt -_id").sort({ createdAt: -1 }); // sorted for latest message
+    })
+      .select("chatId content sender createdAt -_id")
+      .sort({ createdAt: -1 }); // sorted for latest message
 
-    const formattedMessages = allMessages.reduce((acc, message) => { //grouping messages by chatId
+    const formattedMessages = allMessages.reduce((acc, message) => {
+      //grouping messages by chatId
       if (!acc[message.chatId]) {
         acc[message.chatId] = [];
       }
@@ -294,19 +297,24 @@ const getAllFriendsWithChatId = async (req, res) => {
       return acc;
     }, {});
 
-
     const formattedData = friendList.map((f) => {
       return {
         chatId: f._id,
         friend: f.participants.find((p) => p._id.toString() !== req.userID),
-        lastMessage: formattedMessages[f._id] ? formattedMessages[f._id][0] : null, //add latest message
+        lastMessage: formattedMessages[f._id]
+          ? formattedMessages[f._id][0]
+          : null, //add latest message
       };
     });
 
     //sort formattedData/friendList list  by latest message
     formattedData.sort((a, b) => {
-      const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(0);
-      const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt) : new Date(0);
+      const timeA = a.lastMessage
+        ? new Date(a.lastMessage.createdAt)
+        : new Date(0);
+      const timeB = b.lastMessage
+        ? new Date(b.lastMessage.createdAt)
+        : new Date(0);
 
       return timeB - timeA; //latest message first
     });

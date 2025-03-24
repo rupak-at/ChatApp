@@ -11,12 +11,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateFriendOnlineStatus } from "@/lib/redux/features/friendListSlice";
 
 const FriendChat = ({ friend, chatId }) => {
-  const friends = useSelector((state) => state.friendList.friendList)
+  const friends = useSelector((state) => state.friendList.friendList);
   const userInfo = useSelector((state) => state.userInfo.userInfo);
   const messageConatinerRef = useRef();
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeout = useRef(null);
 
   const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
   const isOnline = selectedFriend?.friend?.isOnline;
@@ -29,7 +31,10 @@ const FriendChat = ({ friend, chatId }) => {
 
     setSocket(newSocket);
 
-    return () => newSocket.disconnect();
+    return () => {
+      newSocket.disconnect();
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    };
   }, []);
   //join chat room
   useEffect(() => {
@@ -52,8 +57,18 @@ const FriendChat = ({ friend, chatId }) => {
       });
 
       socket.on("user-offline", (userId) => {
-        if ( friend?._id === userId) {
+        if (friend?._id === userId) {
           dispatch(updateFriendOnlineStatus({ userId, isOnline: false }));
+        }
+      });
+
+      socket.on("started-typing", (data) => {
+        if (data.chatId === chatId && data.typer !== userInfo._id) {
+          setIsTyping(true);
+          if (typingTimeout.current) clearTimeout(typingTimeout.current);
+          typingTimeout.current = setTimeout(() => {
+            setIsTyping(false);
+          }, 2000);
         }
       });
     }
@@ -63,9 +78,10 @@ const FriendChat = ({ friend, chatId }) => {
         socket.off("receive-message");
         socket.off("user-online");
         socket.off("user-offline");
+        socket.off("started-typing");
       }
     };
-  }, [socket, friend]);
+  }, [socket, friend, isTyping]);
 
   const handleMessageSent = async (e) => {
     e.preventDefault();
@@ -105,7 +121,7 @@ const FriendChat = ({ friend, chatId }) => {
       messageConatinerRef.current.scrollTop =
         messageConatinerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   if (!friend) {
     return (
@@ -221,6 +237,10 @@ const FriendChat = ({ friend, chatId }) => {
                 Start Your Converstion
               </div>
             )}
+
+            {isTyping && (
+              <div className="text-gray-500 italic text-sm">Typing...</div>
+            )}
           </div>
         </div>
 
@@ -236,6 +256,12 @@ const FriendChat = ({ friend, chatId }) => {
                   e.preventDefault();
                   handleMessageSent(e);
                 }
+              }}
+              onChange={(e) => {
+                socket.emit("user-typing", {
+                  chatId,
+                  typer: userInfo._id,
+                });
               }}
             ></textarea>
             <button

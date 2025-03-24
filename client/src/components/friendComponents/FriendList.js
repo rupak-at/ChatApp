@@ -136,7 +136,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
                 {friend?.username}
               </div>
               <div className="text-xs text-gray-400 truncate max-w-full">
-                {(lastMessage?.senderId === userInfo._id ? (
+                {((lastMessage?.senderId || lastMessage?.sender.toString()) === userInfo._id ? (
                   <span className="font-bold">
                     You:{" "}
                     <span className="text-xs font-normal">

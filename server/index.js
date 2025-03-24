@@ -60,6 +60,10 @@ io.on("connection", (socket) => {
     delete onlineUser[userId];
   });
 
+  socket.on("user-typing", (data) => {
+    io.to(data.chatId).emit("started-typing", data);
+  });
+
   // Join a room based on chatId
   socket.on("join-chat", (chatId) => {
     socket.join(chatId);
