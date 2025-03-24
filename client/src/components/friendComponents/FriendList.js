@@ -3,6 +3,7 @@ import {
   changeFriendListOrder,
   setFriendList,
   updateFriendOnlineStatus,
+  updateLastMessage,
 } from "@/lib/redux/features/friendListSlice";
 import axios from "axios";
 import Image from "next/image";
@@ -13,6 +14,7 @@ import { io } from "socket.io-client";
 const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   const dispatch = useDispatch();
   const friends = useSelector((state) => state.friendList.friendList);
+  const userInfo = useSelector((state) => state.userInfo.userInfo);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
     const getFriends = async () => {
@@ -40,15 +42,26 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   }, []);
 
   useEffect(() => {
+    if (socket && friends) {
+      //to update chat list as per msg received
+      friends.forEach((f) => {
+        socket.emit("join-chat", f?.chatId);
+      });
+    }
+  }, [socket, friends]);
+  useEffect(() => {
     if (socket) {
       socket.on("user-online", (userId) => {
         dispatch(updateFriendOnlineStatus({ userId, isOnline: true }));
       });
 
-      // socket.on("receive-message", (message) => {
-      //   console.log("indside list receive message: ", message);
-      //   // dispatch(changeFriendListOrder(message?.senderId));
-      // });
+      socket.on("receive-message", (message) => {
+        console.log(message);
+        dispatch(
+          updateLastMessage({ chatId: message?.chatId, lastMessage: message })
+        );
+        dispatch(changeFriendListOrder(message?.senderId));
+      });
     }
 
     return () => {
@@ -60,7 +73,9 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   }, [socket]);
 
   const searchedFriends = friends?.filter((f) => {
-    if (f?.friend.username.toLowerCase().includes(searchFriend.toLowerCase())) {
+    if (
+      f?.friend?.username.toLowerCase().includes(searchFriend.toLowerCase())
+    ) {
       return f;
     }
   });
@@ -82,7 +97,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
       </div>
 
       <div className="flex flex-col py-2">
-        {searchedFriends.map(({ friend, chatId }) => (
+        {searchedFriends.map(({ friend, chatId, lastMessage }) => (
           <div
             onClick={() => onClickFriend(friend, chatId)}
             key={friend._id}
@@ -95,7 +110,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
             {/* Friend's Image */}
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-white flex items-center justify-center overflow-hidden shadow-md">
-                {friend.avatar ? (
+                {friend?.avatar ? (
                   <Image
                     src={friend.avatar}
                     height={48}
@@ -110,7 +125,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
               {/* Active Status Indicator */}
               <span
                 className={`h-3 w-3 rounded-full absolute border border-gray-900 ${
-                  friend.isOnline ? "bg-green-500" : "bg-gray-400"
+                  friend?.isOnline ? "bg-green-500" : "bg-gray-400"
                 } bottom-0 right-1 transform translate-x-1`}
               ></span>
             </div>
@@ -118,10 +133,19 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
             {/* Friend's Name */}
             <div className="flex flex-col flex-1 gap-0.5 truncate">
               <div className="text-base font-medium text-gray-100 truncate">
-                {friend.username}
+                {friend?.username}
               </div>
               <div className="text-xs text-gray-400 truncate max-w-full">
-                {/* {friend.lastMessage || "Start a conversation"} */}
+                {(lastMessage?.senderId === userInfo._id ? (
+                  <span className="font-bold">
+                    You:{" "}
+                    <span className="text-xs font-normal">
+                      {lastMessage.content}
+                    </span>
+                  </span>
+                ) : (
+                  lastMessage.content
+                )) || "No messages yet"}
               </div>
             </div>
           </div>

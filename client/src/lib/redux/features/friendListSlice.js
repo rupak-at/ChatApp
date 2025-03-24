@@ -13,7 +13,7 @@ const friendListSlice = createSlice({
     },
     updateFriendOnlineStatus: (state, action) => {
       state.friendList = state.friendList.map((friend) => {
-        if (friend?.friend._id === action.payload?.userId) {
+        if (friend?.friend?._id === action.payload?.userId) {
           return {
             ...friend,
             friend: { ...friend.friend, isOnline: action.payload?.isOnline },
@@ -23,22 +23,28 @@ const friendListSlice = createSlice({
       });
     },
     changeFriendListOrder: (state, action) => {
-      console.log("inside slice")
-      // const messagingFriend = state.friendList.find(
-      //   ({friend}) => friend?._id === action.payload
-      // );
-      // console.log(state.friendList)
-      // console.log(action.payload)
+      const messagingFriend = state.friendList.find(
+        (f) => f?.friend?._id === action.payload
+      );
 
-      // const f = state.friendList.map((f) => f.friend._id === action.payload)
-      // console.log(f);
-      // console.log(messagingFriend)
+      const newFriendList = state.friendList.filter(
+        (friend) => friend?.friend?._id !== action.payload
+      );
 
-      // const newFriendList = state.friendList.filter(
-      //   (friend) => friend?.friend._id !== action.payload
-      // );
-
-      // state.friendList = [messagingFriend, ...newFriendList];
+      state.friendList = [messagingFriend, ...newFriendList];
+      console.log(state.friendList);
+    },
+    updateLastMessage: (state, action) => {
+      const {chatId, lastMessage} = action.payload;
+      state.friendList = state.friendList.map((friend) => {
+        if (friend?.chatId === chatId) {
+          return {
+            ...friend,
+            lastMessage
+          };
+        }
+        return friend;
+      });
     },
     removeFriendList: (state) => {
       state.friendList = [];
@@ -46,6 +52,11 @@ const friendListSlice = createSlice({
   },
 });
 
-export const { setFriendList, removeFriendList, updateFriendOnlineStatus, changeFriendListOrder } =
-  friendListSlice.actions;
+export const {
+  setFriendList,
+  removeFriendList,
+  updateFriendOnlineStatus,
+  changeFriendListOrder,
+  updateLastMessage,
+} = friendListSlice.actions;
 export default friendListSlice.reducer;

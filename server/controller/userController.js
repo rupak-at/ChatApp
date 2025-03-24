@@ -1,6 +1,7 @@
 import { FriendRequest } from "../model/friendRequestModel.js";
 import { IndividualChat } from "../model/singleChatModel.js";
 import { User } from "../model/userModel.js";
+import { Message } from "../model/messageModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const options = {
@@ -279,12 +280,35 @@ const getAllFriendsWithChatId = async (req, res) => {
       path: "participants",
       select: "-password -refreshToken",
     });
+    const chatIds = friendList.map((f) => f._id);
+
+    const allMessages = await Message.find({
+      chatId: { $in: chatIds }, //gets all documents where chatId is in chatIds []
+    }).select("chatId content sender createdAt -_id").sort({ createdAt: -1 }); // sorted for latest message
+
+    const formattedMessages = allMessages.reduce((acc, message) => { //grouping messages by chatId
+      if (!acc[message.chatId]) {
+        acc[message.chatId] = [];
+      }
+      acc[message.chatId].push(message);
+      return acc;
+    }, {});
+
 
     const formattedData = friendList.map((f) => {
       return {
         chatId: f._id,
         friend: f.participants.find((p) => p._id.toString() !== req.userID),
+        lastMessage: formattedMessages[f._id] ? formattedMessages[f._id][0] : null, //add latest message
       };
+    });
+
+    //sort formattedData/friendList list  by latest message
+    formattedData.sort((a, b) => {
+      const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(0);
+      const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt) : new Date(0);
+
+      return timeB - timeA; //latest message first
     });
 
     return res.status(200).json({ message: "Friends", Friends: formattedData });

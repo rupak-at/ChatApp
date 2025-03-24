@@ -96,6 +96,7 @@ const sendMessage = async (req, res) => {
       avatar: senderUser.avatar,
       content: message.content,
       createdAt: message.createdAt,
+      chatId: chatId,
     };
     //emit message to chatRoom
     const io = req.app.get("io");

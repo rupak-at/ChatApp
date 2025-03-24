@@ -8,7 +8,7 @@ import UserInfoPopOver from "../UserInfoPopOver";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import { changeFriendListOrder, updateFriendOnlineStatus } from "@/lib/redux/features/friendListSlice";
+import { updateFriendOnlineStatus } from "@/lib/redux/features/friendListSlice";
 
 const FriendChat = ({ friend, chatId }) => {
   const friends = useSelector((state) => state.friendList.friendList)
@@ -18,8 +18,8 @@ const FriendChat = ({ friend, chatId }) => {
   const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
 
-  const selectedFriend = friends.find((f) => f?.friend._id === friend?._id);
-  const isOnline = selectedFriend?.friend.isOnline;
+  const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
+  const isOnline = selectedFriend?.friend?.isOnline;
 
   //make io connection
   useEffect(() => {
@@ -43,7 +43,6 @@ const FriendChat = ({ friend, chatId }) => {
     if (socket) {
       socket.on("receive-message", (message) => {
         setMessages((prev) => [...prev, message]);
-        // dispatch(changeFriendListOrder(message.senderId));
       });
 
       socket.on("user-online", (userId) => {
