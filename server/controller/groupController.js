@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { GroupChat } from "../model/groupChatModel.js";
 import { Message } from "../model/messageModel.js";
+import { User } from "../model/userModel.js";
+import app from "../router/groupRoute.js";
 
 const createGroup = async (req, res) => {
   try {
@@ -158,7 +160,7 @@ const removeMember = async (req, res) => {
 
 const leaveGroup = async (req, res) => {
   try {
-    const groupID = req.params.id
+    const groupID = req.params.id;
 
     if (!mongoose.isValidObjectId(groupID)) {
       return res.status(400).json({ message: "Invalid Group ID" });
@@ -192,27 +194,28 @@ const leaveGroup = async (req, res) => {
 const myGroups = async (req, res) => {
   try {
     const groups = await GroupChat.find({ participants: req.userID });
-    
+
     if (groups.length === 0) {
       return res.status(404).json({ message: "No Groups Found" });
     }
 
-    const formattedGroups = groups.map(({groupName, _id}) => ({
+    const formattedGroups = groups.map(({ groupName, _id }) => ({
       _id,
       groupName,
     }));
-    
-    return res.status(200).json({ message: "My Groups", groups: formattedGroups });
 
+    return res
+      .status(200)
+      .json({ message: "My Groups", groups: formattedGroups });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
   }
-}
+};
 
 const myMessages = async (req, res) => {
   try {
-    const groupId = req.params.id
+    const groupId = req.params.id;
 
     const group = await GroupChat.findById(groupId);
 
@@ -224,24 +227,91 @@ const myMessages = async (req, res) => {
       return res.status(401).json({ message: "You Are Not In The Group" });
     }
 
-    const messages = await Message.find({ chatId: groupId, chatType: "GroupChat" }).populate("sender");
+    const messages = await Message.find({
+      chatId: groupId,
+      chatType: "GroupChat",
+    }).populate("sender");
 
     if (messages.length === 0) {
-      return res.status(404).json({ message: `No Messages Found in ${group.groupName}` });
+      return res
+        .status(404)
+        .json({ message: `No Messages Found in ${group.groupName}` });
     }
 
-    const formattedMessages = messages.map(({sender, content, createdAt}) => ({
-      sender: sender.username,
-      content,
-      createdAt
-    }));
+    const formattedMessages = messages.map(
+      ({ sender, content, createdAt }) => ({
+        sender: sender.username,
+        senderId: sender._id,
+        content,
+        createdAt,
+      })
+    );
 
-    return res.status(200).json({ Group: group.groupName, messages: formattedMessages });
-    
+    return res
+      .status(200)
+      .json({ Group: group.groupName, messages: formattedMessages });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });
   }
-}
+};
 
-export { createGroup, deleteGroup, addMember, removeMember, leaveGroup, myGroups, myMessages };
+const sendMessage = async (req, res) => {
+  try {
+    const chatId = req.params.id;
+
+    if (!mongoose.isValidObjectId(chatId)) {
+      return res.status(400).json({ message: "Invalid Group ID" });
+    }
+
+    const group = await GroupChat.findById(chatId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group Not Found" });
+    }
+
+    if (!group.participants.includes(req.userID)) {
+      return res.status(401).json({ message: "You Are Not In The Group" });
+    }
+
+    const message = await Message.create({
+      sender: req.userID,
+      content: req.body.content,
+      chatId,
+      chatType: "GroupChat",
+    });
+
+    const senderUser = await User.findById(req.userID);
+
+    const formattedMessage = {
+      sender: senderUser?.username,
+      senderId: senderUser?._id,
+      avatar: senderUser.avatar,
+      content: message.content,
+      createdAt: message.createdAt,
+      chatId,
+    };
+
+    const io = req.app.get("io");
+    io.to(chatId).emit("receive-message", formattedMessage);
+
+    return res.status(200).json({
+      message: "Message Sent Successfully",
+      sendMessage: formattedMessage,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Failure" });
+  }
+};
+
+export {
+  createGroup,
+  deleteGroup,
+  addMember,
+  removeMember,
+  leaveGroup,
+  myGroups,
+  myMessages,
+  sendMessage,
+};

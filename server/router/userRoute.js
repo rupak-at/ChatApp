@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   deleteUser,
   getAllFriendsWithChatId,
+  getAllGroupWithChatdId,
   getAllUsers,
   getMyProfile,
   loginUser,
@@ -26,6 +27,7 @@ app.delete("/deleteUser", deleteUser);
 app.get("/getMyProfile", getMyProfile);
 app.post("/updatePassword", updatePassword);
 app.get("/friend", getAllFriendsWithChatId);
+app.get("/group", getAllGroupWithChatdId)
 app.get("/allusers", getAllUsers);
 
 export default app;

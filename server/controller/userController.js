@@ -3,6 +3,7 @@ import { IndividualChat } from "../model/singleChatModel.js";
 import { User } from "../model/userModel.js";
 import { Message } from "../model/messageModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { GroupChat } from "../model/groupChatModel.js";
 
 const options = {
   httpOnly: true,
@@ -344,6 +345,60 @@ const getAllUsers = async (req, res) => {
     return res.status(500).json({ message: "Internal Failure" });
   }
 };
+
+const getAllGroupWithChatdId = async (req, res) => {
+  try {
+    const groupList = await GroupChat.find({
+      participants: req.userID,
+    }).populate({
+      path: "participants",
+      select: "-password -refreshToken",
+    });
+
+    const groupChatIds = groupList.map((g) => g?._id);
+
+    const allGroupMessages = await Message.find({
+      chatId: { $in: groupChatIds },
+    })
+      .select("sender content createdAt chatId")
+      .sort({ createdAt: -1 });
+
+    const formattedMessages = allGroupMessages.reduce((acc, msg) => {
+      if (!acc[msg.chatId]) {
+        acc[msg.chatId] = [];
+      }
+      acc[msg.chatId].push(msg);
+
+      return acc;
+    }, {});
+
+    const formattedData = groupList.map((g) => {
+      return {
+        chatId: g._id,
+        group: g,
+        lastMessage: formattedMessages[g._id]
+          ? formattedMessages[g._id][0]
+          : null,
+      };
+    });
+
+    formattedData.sort((a, b) => {
+      const timeA = a.lastMessage
+        ? new Date(a.lastMessage.createdAt)
+        : new Date(0);
+      const timeB = b.lastMessage
+        ? new Date(b.lastMessage.createdAt)
+        : new Date(0);
+
+      return timeB - timeA;
+    });
+
+    return res.status(200).json({ groups: formattedData });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Internal Server Error");
+  }
+};
 export {
   registerUser,
   loginUser,
@@ -355,4 +410,5 @@ export {
   updatePassword,
   getAllFriendsWithChatId,
   getAllUsers,
+  getAllGroupWithChatdId,
 };

@@ -8,7 +8,10 @@ import UserInfoPopOver from "../UserInfoPopOver";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import { updateFriendOnlineStatus } from "@/lib/redux/features/friendListSlice";
+import {
+  changeFriendListOrder,
+  updateFriendOnlineStatus,
+} from "@/lib/redux/features/friendListSlice";
 
 const FriendChat = ({ friend, chatId }) => {
   const friends = useSelector((state) => state.friendList.friendList);
@@ -48,6 +51,7 @@ const FriendChat = ({ friend, chatId }) => {
     if (socket) {
       socket.on("receive-message", (message) => {
         setMessages((prev) => [...prev, message]);
+        dispatch(changeFriendListOrder(message?.chatId));
       });
 
       socket.on("user-online", (userId) => {
@@ -85,14 +89,14 @@ const FriendChat = ({ friend, chatId }) => {
 
   const handleMessageSent = async (e) => {
     e.preventDefault();
-    const message = e.target.value;
+    const message = e.target.message.value;
     try {
       const res = await axios.post(
         `http://localhost:4000/user/message/${chatId}`,
         { content: message },
         { withCredentials: true }
       );
-      e.target.value = "";
+      e.target.message.value = "";
       setMessages([...messages, res.data.sendMessage]);
     } catch (error) {
       toast.error(error.response.data.message);
@@ -247,23 +251,17 @@ const FriendChat = ({ friend, chatId }) => {
         {/* Chat Input Area */}
         <form action="#" onSubmit={handleMessageSent}>
           <div className="flex items-center gap-3 p-4 bg-gray-800 border-t border-gray-700">
-            <textarea
+            <input
               name="message"
               placeholder="Type a message..."
               className="flex-grow h-12 px-4 py-2 rounded-xl text-lg text-gray-100 bg-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none border border-gray-600 resize-none scrollbar-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleMessageSent(e);
-                }
-              }}
               onChange={(e) => {
                 socket.emit("user-typing", {
                   chatId,
                   typer: userInfo._id,
                 });
               }}
-            ></textarea>
+            ></input>
             <button
               type="submit"
               className="h-12 w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"

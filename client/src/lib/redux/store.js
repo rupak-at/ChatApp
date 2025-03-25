@@ -14,6 +14,7 @@ import loginInfoSlice from "./features/loginInfoSlice";
 import notificationSlice from "./features/notificationSlice";
 import friendRequestDetailsSlice from "./features/friendRequestDetailsSlice";
 import friendListSlice from "./features/friendListSlice";
+import groupListSlice from "./features/groupListSlice";
 
 const persistConfig = {
   key: "root",
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
   notification: notificationSlice,
   RequestDetails: friendRequestDetailsSlice,
   friendList: friendListSlice,
+  groupList: groupListSlice,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

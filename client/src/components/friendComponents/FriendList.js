@@ -60,7 +60,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
         dispatch(
           updateLastMessage({ chatId: message?.chatId, lastMessage: message })
         );
-        dispatch(changeFriendListOrder(message?.senderId));
+        dispatch(changeFriendListOrder(message?.chatId));
       });
     }
 

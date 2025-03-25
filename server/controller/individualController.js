@@ -102,12 +102,10 @@ const sendMessage = async (req, res) => {
     const io = req.app.get("io");
     io.to(chatId).emit("receive-message", formattedMessage);
 
-    return res
-      .status(200)
-      .json({
-        message: "Message Sent Successfully",
-        sendMessage: formattedMessage,
-      });
+    return res.status(200).json({
+      message: "Message Sent Successfully",
+      sendMessage: formattedMessage,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Failure" });

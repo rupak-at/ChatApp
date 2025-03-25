@@ -32,20 +32,20 @@ A real-time chat application built with modern web technologies.
 - [✅] Hash passwords before storing them in the database
 
 ### Real-time Chat
-- [ ] Implement individual chat functionality
-- [ ] Implement group chat functionality
-- [ ] Integrate Socket.io for real-time messaging
+- [✅] Implement individual chat functionality
+- [✅] Implement group chat functionality
+- [✅] Integrate Socket.io for real-time messaging
 - [ ] Handle message notifications
 
 ### Chat Features
-- [ ] Implement typing indicator in real-time chat
-- [ ] Add timestamp to messages
+- [✅] Implement typing indicator in real-time chat
+- [✅] Add timestamp to messages
 - [ ] Enable sending media (images, files, etc.)
-- [ ] Allow users to send emojis and attachments
+
 
 ### UI/UX
 - [✅] Design chat section for individual chat
 - [ ] Implement notification system for new messages
-- [ ] Design chat section for group
+- [✅] Design chat section for group
 - [ ] Profile Info
 - [ ] Group Info

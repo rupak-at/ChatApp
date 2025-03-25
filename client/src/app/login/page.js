@@ -31,7 +31,7 @@ const LoginForm = () => {
         const { message, user } = response.data;
         dispatch(loadUserInfo(user));
         toast.success(message + " to " + user.username);
-        router.push("/kurakani");
+        router.push("/kurakani/chat");
       }
     } catch (error) {
       const { message } = error.response.data;

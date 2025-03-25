@@ -24,23 +24,22 @@ const friendListSlice = createSlice({
     },
     changeFriendListOrder: (state, action) => {
       const messagingFriend = state.friendList.find(
-        (f) => f?.friend?._id === action.payload
+        (f) => f?.chatId === action.payload
       );
 
       const newFriendList = state.friendList.filter(
-        (friend) => friend?.friend?._id !== action.payload
+        (friend) => friend?.chatId !== action.payload
       );
 
       state.friendList = [messagingFriend, ...newFriendList];
-      console.log(state.friendList);
     },
     updateLastMessage: (state, action) => {
-      const {chatId, lastMessage} = action.payload;
+      const { chatId, lastMessage } = action.payload;
       state.friendList = state.friendList.map((friend) => {
         if (friend?.chatId === chatId) {
           return {
             ...friend,
-            lastMessage
+            lastMessage,
           };
         }
         return friend;
