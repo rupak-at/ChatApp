@@ -6,7 +6,7 @@ import GroupListHeader from "@/components/groupComponents/GroupListHeader";
 import React, { useState } from "react";
 
 const Group = () => {
-  const [selectGroup, setSelectGroup] = useState(null);
+  const [selectGroup, setSelectGroup] = useState("");
   const [searchGroup, setSearchGroup] = useState("");
   const [chatId, setChatId] = useState(null);
 

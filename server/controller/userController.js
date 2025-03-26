@@ -331,7 +331,9 @@ const getAllUsers = async (req, res) => {
   try {
     const { username } = req.query;
 
-    const user = await User.find({ username: { $regex: username } }).select(
+    const user = await User.find({
+      _id: {$ne: req.userID},
+    }).select(
       "-password -refreshToken"
     );
 
@@ -348,12 +350,13 @@ const getAllUsers = async (req, res) => {
 
 const getAllGroupWithChatdId = async (req, res) => {
   try {
+    console.log("indsie route");
     const groupList = await GroupChat.find({
       participants: req.userID,
     }).populate({
       path: "participants",
       select: "-password -refreshToken",
-    });
+    }).lean();
 
     const groupChatIds = groupList.map((g) => g?._id);
 
@@ -373,9 +376,10 @@ const getAllGroupWithChatdId = async (req, res) => {
     }, {});
 
     const formattedData = groupList.map((g) => {
+      const avatar = [g.participants[0]?.avatar, g.participants[1]?.avatar, g.participants[2]?.avatar];
       return {
         chatId: g._id,
-        group: g,
+        group: {...g, avatar},
         lastMessage: formattedMessages[g._id]
           ? formattedMessages[g._id][0]
           : null,

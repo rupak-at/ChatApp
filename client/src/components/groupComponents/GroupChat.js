@@ -3,18 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoCall } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
-import { BsFillInfoCircleFill } from "react-icons/bs";
-import { Button } from "@/components/ui/button";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { updateGroupListOrder } from "@/lib/redux/features/groupListSlice";
+import OverlappingAvatars from "./GroupOverLapingImage";
+import GroupInfoPopOver from "./GroupInfoPopOver";
 
 const GroupChat = ({ selectGroup, chatId }) => {
   const messageConatinerRef = useRef();
@@ -129,19 +124,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
         <div className="flex justify-between items-center bg-gray-800/95 backdrop-blur-sm px-6 py-3 shadow-lg border-b border-gray-700 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-                {selectGroup?.groupIcon && selectGroup.groupIcon !== "" ? (
-                  <Image
-                    src={selectGroup.groupIcon}
-                    width={48}
-                    height={48}
-                    alt="Friend Image"
-                    className="rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl text-gray-300">👤</span>
-                )}
-              </div>
+              <OverlappingAvatars avatars={selectGroup?.avatar}/>
               <span
                 className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
                   selectGroup?.isActive ? "bg-green-500" : "bg-gray-500"
@@ -153,7 +136,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
                 {selectGroup?.groupName || "Unknown User"}
               </div>
               <div className="text-xs text-gray-400">
-                {selectGroup.isOnline ? "Online" : "Offline"}
+                {selectGroup?.participants.length} Members
               </div>
             </div>
           </div>
@@ -171,37 +154,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
               />
             </button>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button className="bg-gray-800 border-none">
-                  {" "}
-                  <BsFillInfoCircleFill
-                    size={23}
-                    className="text-zinc-200  transition-all duration-200"
-                  />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-zinc-700  border-zinc-900">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Image
-                      src={selectGroup.groupIcon}
-                      height={50}
-                      width={50}
-                      alt="Profile_image"
-                      className="h-16 w-16 rounded-full border-gray-200"
-                    />
-                    <div className="w-full border"></div>
-                    <h4 className="font-medium leading-none text-white ">
-                      {selectGroup.groupName}
-                    </h4>
-                    <Button className="text-sm text-slate-200 bg-red-500 hover:bg-red-600 transition-all duration-300">
-                      Leave
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <GroupInfoPopOver selectGroup={selectGroup} chatId={chatId} />
           </div>
         </div>
 
@@ -231,7 +184,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
                   >
                     <p className="break-words">{message?.content}</p>
                     <span
-                      className={`text-[11px] flex justify-between opacity-60 w-full mt-1 ${
+                      className={`text-[11px] flex justify-between opacity-60 w-full mt-1 gap-4 ${
                         message.senderId !== userInfo._id
                           ? "text-right"
                           : "text-left"

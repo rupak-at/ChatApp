@@ -2,7 +2,7 @@
 import FriendCard from "@/components/searched-user/FriendCard";
 import axios from "axios";
 import { SearchIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const Search = () => {
@@ -35,29 +35,35 @@ const Search = () => {
       });
       return;
     }
-
-    try {
-      const res = await axios.get(
-        `http://localhost:4000/allusers?username=${search}`,
-        { withCredentials: true }
-      );
-
-      console.log(res.data.user);
-      setUsers(res.data.user);
-    } catch (error) {
-      toast(error.response.data.message, {
-        icon: "❌",
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-        duration: 1000,
-      });
-
-      console.error(error);
-    }
   };
+
+  useEffect(() => {
+    const getAllUsers = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:4000/allusers`,
+          { withCredentials: true }
+        );
+  
+        console.log(res.data.user);
+        setUsers(res.data.user);
+      } catch (error) {
+        toast(error.response.data.message, {
+          icon: "❌",
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+          duration: 1000,
+        });
+  
+        console.error(error);
+      }
+    }
+
+    getAllUsers();
+  }, [])
   return (
     <div className="h-screen flex flex-col items-center gap-4 w-screen bg-gray-900 font-sans overflow-auto">
       <div className="relative w-96 top-4">

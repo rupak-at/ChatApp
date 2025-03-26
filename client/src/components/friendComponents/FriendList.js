@@ -140,11 +140,11 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
                   <span className="font-bold">
                     You:{" "}
                     <span className="text-xs font-normal">
-                      {lastMessage.content}
+                      {lastMessage?.content}
                     </span>
                   </span>
                 ) : (
-                  lastMessage.content
+                  lastMessage?.content
                 )) || "No messages yet"}
               </div>
             </div>

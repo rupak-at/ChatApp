@@ -11,7 +11,6 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import loginInfoSlice from "./features/loginInfoSlice";
-import notificationSlice from "./features/notificationSlice";
 import friendRequestDetailsSlice from "./features/friendRequestDetailsSlice";
 import friendListSlice from "./features/friendListSlice";
 import groupListSlice from "./features/groupListSlice";
@@ -23,8 +22,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   userInfo: loginInfoSlice,
-  notification: notificationSlice,
-  RequestDetails: friendRequestDetailsSlice,
+  requestDetails: friendRequestDetailsSlice,
   friendList: friendListSlice,
   groupList: groupListSlice,
 });

@@ -30,7 +30,7 @@ connectDB().then(() => {
 app.use(
   cors({
     origin: "http://localhost:3000",
-    methods: ["POST", "GET", "DELETE", "PATCH"],
+    methods: ["POST", "GET", "DELETE", "PATCH", "PUT"],
     credentials: true,
   })
 );

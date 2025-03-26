@@ -8,6 +8,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import OverlappingAvatars from "./GroupOverLapingImage";
 
 const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
   const { userInfo } = useSelector((state) => state.userInfo);
@@ -73,12 +74,7 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
   });
   return (
     <div className="bg-gray-900 w-96 h-screen font-sans shadow-lg border-r border-gray-800 overflow-y-auto scrollbar-none">
-      <div className="sticky top-0 bg-gray-900 p-3 border-b border-gray-800">
-        <h2 className="text-xl font-semibold text-gray-100 px-2">
-          Conversations
-        </h2>
-      </div>
-      <div className="flex flex-col py-2">
+      <div className="flex flex-col py-2 pt-4">
         {searchedGroup.map(({ group, chatId, lastMessage }) => (
           <div
             onClick={() => handleGroupSelect(group, chatId)}
@@ -91,7 +87,8 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
           >
             {/* Friend's Image */}
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-white flex items-center justify-center overflow-hidden shadow-md">
+            <OverlappingAvatars avatars={group?.avatar} />
+              {/* <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-white flex items-center justify-center overflow-hidden shadow-md">
                 {group.avatar ? (
                   <Image
                     src={group.groupIcon}
@@ -103,7 +100,7 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
                 ) : (
                   <span className="text-xl text-gray-300">👤</span>
                 )}
-              </div>
+              </div> */}
               {/* Active Status Indicator */}
               <span
                 className={`h-3 w-3 border border-gray-900 rounded-full absolute ${
