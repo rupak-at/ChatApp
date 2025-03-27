@@ -6,21 +6,24 @@ import {
 } from "@/components/ui/popover";
 import Image from "next/image";
 import { Bell, Check } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RxCross1 } from "react-icons/rx";
 import toast from "react-hot-toast";
 import axios from "axios";
+import getFriends from "@/app/api/getFriends";
+import { setFriendList } from "@/lib/redux/features/friendListSlice";
 
 const NotificationPopOver = () => {
   const requests = useSelector(
     (state) => state.requestDetails.friendRequestDetails
   );
-
+  const dispatch = useDispatch();
   const handleAccept = async (requestId) => {
     try {
       const {data} = await axios.post(`http://localhost:4000/request/acceptRequest/${requestId}`,{}, {withCredentials: true});
       if (data){
         toast.success("Request Accepted");
+        getFriends().then((res) => dispatch(setFriendList(res)));
       }
     } catch (error) {
       if (error.status){

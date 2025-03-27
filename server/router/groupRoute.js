@@ -17,7 +17,7 @@ app.use(verifyLogin);
 app.post("/makeGroup", createGroup);
 app.post("/deleteGroup", deleteGroup);
 app.put("/addMember", addMember);
-app.put("/removeMember", removeMember);
+app.post("/removeMember", removeMember);
 app.delete("/leaveGroup/:id", leaveGroup);
 app.get("/myGroups", myGroups);
 app.get("/myMessages/:id", myMessages);

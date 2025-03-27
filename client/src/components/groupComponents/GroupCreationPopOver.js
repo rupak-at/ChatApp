@@ -1,4 +1,6 @@
 "use client";
+import createGroup from "@/app/api/createGroup";
+import getGroups from "@/app/api/getGroups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -6,19 +8,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { setGroupList } from "@/lib/redux/features/groupListSlice";
 import axios from "axios";
 import { Check, CircleMinus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const GroupCreationPopOver = () => {
   const { friendList } = useSelector((state) => state.friendList);
 
   const { register, handleSubmit } = useForm();
   const [selectedFriends, setSelectedFriends] = useState([]);
+  const dispatch = useDispatch();
 
   const addFriend = (friend) => {
     if (!selectedFriends.some((f) => f._id === friend._id)) {
@@ -26,23 +30,16 @@ const GroupCreationPopOver = () => {
     }
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = (data) => {
     const name = data.groupName;
     const members = selectedFriends;
-
-    try {
-      const { data } = await axios.post(
-        "http://localhost:4000/group/makeGroup",
-        { name, members },
-        { withCredentials: true }
-      );
-      toast.success("Group Created Successfully");
-    } catch (error) {
-      if (error.status) {
-        console.log(error.response.data.message);
-        toast.error(error.response.data.message);
-      }
-    }
+    
+    createGroup(name, members)
+    .then((res) => {
+      toast.success(res)
+      getGroups().then((res) => dispatch(setGroupList(res)));
+    })
+    .catch((err) => toast.error(err));
   };
 
   return (

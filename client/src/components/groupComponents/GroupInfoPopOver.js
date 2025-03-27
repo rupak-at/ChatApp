@@ -7,11 +7,32 @@ import {
 } from "@/components/ui/popover";
 import Image from "next/image";
 import { MdAdminPanelSettings } from "react-icons/md";
-import { Plus } from "lucide-react";
 import AddMembers from "./AddMembers";
+import { Minus } from "lucide-react";
+import { useSelector } from "react-redux";
+import removeGroupMember from "@/app/api/removeGroupMember";
+import toast from "react-hot-toast";
+import leaveGroup from "@/app/api/leaveGroup";
 
 
 const GroupInfoPopOver = ({ selectGroup, chatId }) => {
+  const {userInfo} = useSelector((state) => state.userInfo);
+
+  const handleRemoveMember = (memberId) => {
+    removeGroupMember({groupID: chatId, memberID: memberId})
+    .then((res) => {
+      toast.success(res);
+    }).catch((err) => {
+      toast.error(err);
+    });
+  };
+
+  const handleLeaveGroup = (groupId) => {
+    leaveGroup(groupId).then((res) => {
+      toast.success(res);
+    }).catch((e) => toast.error(e));
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -23,15 +44,15 @@ const GroupInfoPopOver = ({ selectGroup, chatId }) => {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 bg-zinc-700  border-zinc-900">
+      <PopoverContent className="w-80 bg-gray-900  max-h-[80vw]">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <div className="w-full border"></div>
+            <div className="w-full border border-purple-500"></div>
             <div className="flex items-center justify-between">
                 <h4 className="font-medium text-xl leading-none text-white ">
                 {selectGroup?.groupName}
                 </h4>
-                <Button className="text-sm text-slate-200 bg-red-500 hover:bg-red-600 transition-all duration-300 px-3 py-1">
+                <Button onClick={() => handleLeaveGroup(chatId)} className="text-sm text-slate-200 bg-red-500 hover:bg-red-600 transition-all duration-300 px-3 py-1">
                 Leave
                 </Button>
             </div>
@@ -40,17 +61,39 @@ const GroupInfoPopOver = ({ selectGroup, chatId }) => {
                     <p className="text-lg text-zinc-300 font-semibold">Members</p>
                     <AddMembers chatId={chatId} />
                 </div>
-                <div>
+                <div className="h-[60vh] overflow-y-auto">
                     {selectGroup?.participants.map((p) => (
-                        <div key={p?._id} className="flex justify-between items-center p-3 border-b text-white">
-                            <div className="flex gap-4 items-center">
+                        <div key={p?._id} className="flex justify-between items-center p-3 border-b border-b-purple-400 text-white">
+                            
+                            <div className="flex justify-between items-center w-full">
+                              <div className="flex gap-4 items-center">
                                 <div>
                                     <Image src={p?.avatar} height={20} width={20} alt={`image-${p._id}`} className="rounded-full h-12 w-12"/>
                                 </div>
-                                <div className="font-bold text-xl ">{p?.username}</div>
+                                <div>
+                                  <div className="font-bold text-xl ">{p?.username}</div>
+                                  <div className="text-xs text-gray-500 font-medium">{p?.email}</div>
+                                </div>
+                              </div>
+                              <div>
+                                {selectGroup?.groupAdmin === userInfo?._id &&
+                                selectGroup?.groupAdmin !== p?._id && 
+                                (
+                                  <Button onClick={() => {
+                                    handleRemoveMember(p?._id);
+                                  }} className={"bg-red-500 hover:bg-red-600 p-0 h-6 w-8"}>
+                                    <span><Minus /></span>
+                                  </Button>
+                                )
+                                }
+                              </div>
                             </div>
-                            {selectGroup?.groupAdmin === p?._id && 
-                            <MdAdminPanelSettings size={25} className="text-purple-500" />}
+                              
+                            <div>
+
+                              {selectGroup?.groupAdmin === p?._id && 
+                              <MdAdminPanelSettings size={25} className="text-purple-500" />}
+                            </div>
                         </div>
                     ))}
                 </div>

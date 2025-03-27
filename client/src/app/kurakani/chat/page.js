@@ -17,7 +17,7 @@ const Chat = () => {
   }
 
   return (
-    <div className='flex h-screen overflow-hidden'>
+    <div className='flex h-screen'>
       <div className='flex flex-col '>
         <div className='fixed top-0 z-50'>
           <FriendListHeader setSearchFriend={setSearchFriend} headerName='Friends'/>

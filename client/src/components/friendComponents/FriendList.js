@@ -1,4 +1,5 @@
 "use client";
+import getFriends from "@/app/api/getFriends";
 import {
   changeFriendListOrder,
   setFriendList,
@@ -17,18 +18,8 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   const userInfo = useSelector((state) => state.userInfo.userInfo);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    const getFriends = async () => {
-      try {
-        const res = await axios.get("http://localhost:4000/friend", {
-          withCredentials: true,
-        });
-        dispatch(setFriendList(res.data.Friends));
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getFriends();
-  }, []);
+    getFriends().then((res) => dispatch(setFriendList(res)));
+  }, [dispatch]);
 
   useEffect(() => {
     const newSocket = io("http://localhost:4000", {
@@ -89,14 +80,8 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   }
 
   return (
-    <div className="bg-gray-900 w-96 h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-      <div className="sticky top-0 bg-gray-900 p-3 border-b border-gray-800">
-        <h2 className="text-xl font-semibold text-gray-100 px-2">
-          Conversations
-        </h2>
-      </div>
-
-      <div className="flex flex-col py-2">
+    <div className="bg-gray-900 w-96 min-h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+      <div className="flex flex-col py-2 pb-5">
         {searchedFriends.map(({ friend, chatId, lastMessage }) => (
           <div
             onClick={() => onClickFriend(friend, chatId)}
@@ -136,7 +121,8 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
                 {friend?.username}
               </div>
               <div className="text-xs text-gray-400 truncate max-w-full">
-                {((lastMessage?.senderId || lastMessage?.sender.toString()) === userInfo._id ? (
+                {((lastMessage?.senderId || lastMessage?.sender.toString()) ===
+                userInfo._id ? (
                   <span className="font-bold">
                     You:{" "}
                     <span className="text-xs font-normal">
