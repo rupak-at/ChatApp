@@ -3,12 +3,14 @@ import { loadUserInfo } from "@/lib/redux/features/loginInfoSlice";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { set, useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
+import { io } from "socket.io-client";
+import socket from "@/lib/socket";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -30,6 +32,7 @@ const LoginForm = () => {
       if (response.status === 200) {
         const { message, user } = response.data;
         dispatch(loadUserInfo(user));
+        socket.emit("login", user?._id);
         toast.success(message + " to " + user.username);
         router.push("/kurakani/chat");
       }

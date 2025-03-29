@@ -350,7 +350,6 @@ const getAllUsers = async (req, res) => {
 
 const getAllGroupWithChatdId = async (req, res) => {
   try {
-    console.log("indsie route");
     const groupList = await GroupChat.find({
       participants: req.userID,
     }).populate({

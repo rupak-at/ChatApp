@@ -44,41 +44,50 @@ app.use("/user", singleChatRoute);
 app.use("/group", groupChatRoute);
 app.use("/request", friendRequest);
 
-const onlineUser = {};
 // Socket.IO connection
+global.onlineUser = {};
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+  // console.log("A user connected:", socket.id);
 
   socket.on("login", (userId) => {
     console.log("User logged in: ", userId);
+
+    if (global.onlineUser[userId]) {
+      global.onlineUser[userId] = socket.id;
+    }
+    global.onlineUser[userId] = socket.id;
+
     io.emit("user-online", userId);
-    onlineUser[userId] = socket.id;
   });
+
   socket.on("logout", (userId) => {
     console.log("User logged out: ", userId);
     io.emit("user-offline", userId);
-    delete onlineUser[userId];
+    delete global.onlineUser[userId];
   });
 
   socket.on("user-typing", (data) => {
     io.to(data.chatId).emit("started-typing", data);
   });
 
+  socket.on("new-friend-request", (data) => {
+    io.to(data).emit("new-friend-request", data);
+  })
   // Join a room based on chatId
   socket.on("join-chat", (chatId) => {
     socket.join(chatId);
-    console.log(`User ${socket.id} joined chat ${chatId}`);
+    // console.log(`User ${socket.id} joined chat ${chatId}`);
   });
 
   // Leave a room when disconnected
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-    const userId = Object.keys(onlineUser).find(
-      (key) => onlineUser[key] === socket.id
+    // console.log("User disconnected:", socket.id);
+    const userId = Object.keys(global.onlineUser).find(
+      (key) => global.onlineUser[key] === socket.id
     );
     if (userId) {
       io.emit("user-offline", userId);
-      delete onlineUser[userId];
+      delete global.onlineUser[userId];
     }
   });
 });

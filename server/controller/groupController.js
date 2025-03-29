@@ -2,18 +2,13 @@ import mongoose from "mongoose";
 import { GroupChat } from "../model/groupChatModel.js";
 import { Message } from "../model/messageModel.js";
 import { User } from "../model/userModel.js";
-import app from "../router/groupRoute.js";
 
 const createGroup = async (req, res) => {
   try {
     let { name, members } = req.body;
-
     if (!name || !members) {
       return res.status(400).json({ message: "All Field Are Required" });
     }
-
-    //add admin to group members
-
     members.push(req.userID);
 
     if (members.length < 3) {
@@ -23,7 +18,6 @@ const createGroup = async (req, res) => {
     }
 
     const group = await GroupChat.findOne({ groupName: name });
-
     if (group) {
       return res.status(409).json({ message: "Group Already Existed" });
     }
@@ -34,6 +28,39 @@ const createGroup = async (req, res) => {
       groupAdmin: req.userID,
     });
 
+      //to send data through socket
+      const populatedGroup = await GroupChat.findById(newGroup._id)
+      .populate({
+        path: "participants",
+        select: "-password -refreshToken",
+      })
+      .lean();
+  
+      const avatar = [
+        populatedGroup.participants[0]?.avatar, 
+        populatedGroup.participants[1]?.avatar, 
+        populatedGroup.participants[2]?.avatar
+      ];
+  
+      const groupData = {
+        chatId: populatedGroup._id.toString(),
+        group: {...populatedGroup, avatar},
+        lastMessage: null,
+      };
+
+      const io = req.app.get("io");
+      const onlineUser = global.onlineUser;
+      console.log(onlineUser);
+      members.forEach((memberId) => {
+        if (memberId !== req.userID) {
+          const socketId = onlineUser[memberId];
+          if (socketId) {
+            io.to(socketId).emit("new-group-creation", groupData);
+            console.log("Emitting new group creation");
+          }
+        }
+      })
+  
     return res
       .status(201)
       .json({ message: "Group Created Successfully", group: newGroup });
@@ -45,7 +72,7 @@ const createGroup = async (req, res) => {
 
 const deleteGroup = async (req, res) => {
   try {
-    const { groupID } = req.body;
+    const groupID  = req.params.id;
 
     //check for valid mongodb _id
     if (!mongoose.isValidObjectId(groupID)) {
@@ -57,11 +84,18 @@ const deleteGroup = async (req, res) => {
     if (!group) {
       return res.status(404).json({ message: "Group Not Found" });
     }
+
     //if not admin
     if (group.groupAdmin.toString() !== req.userID) {
       return res
         .status(401)
         .json({ message: "Unauthorized Request To Delete Group" });
+    }
+
+    const allMessages = await Message.find({ chatId: groupID });
+
+    if (allMessages.length > 0) {
+      await Message.deleteMany({ chatId: groupID });
     }
 
     await group.deleteOne();

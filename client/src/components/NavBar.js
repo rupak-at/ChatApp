@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import UpdateInfo from "./UpdateInfo";
 import { Bell, Search } from "lucide-react";
 import { removeUserInfo } from "@/lib/redux/features/loginInfoSlice";
-import { setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
+import { removeFriendRequestDetails, setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
 import { io } from "socket.io-client";
 import {
   removeFriendList,
@@ -57,7 +57,7 @@ const NavBar = () => {
           { withCredentials: true }
         );
         dispatch(setFriendRequestDetails(res.data.request));
-        console.log(res.data.request);
+        // console.log(res.data.request);
       } catch (error) {
         console.log(error);
       }
@@ -99,6 +99,7 @@ const NavBar = () => {
         dispatch(removeUserInfo());
         dispatch(removeFriendList());
         dispatch(removeGroupList());
+        dispatch(removeFriendRequestDetails())
         router.push("/login");
       }
     } catch (error) {

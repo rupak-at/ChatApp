@@ -1,10 +1,9 @@
 import {
+  addGroupList,
   setGroupList,
   updateGroupListOrder,
   updateLastMessageGroup,
 } from "@/lib/redux/features/groupListSlice";
-import axios from "axios";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
@@ -18,7 +17,9 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", { withCredentials: true });
+    const newSocket = io("http://localhost:4000", {
+      withCredentials: true,
+    });
 
     if (newSocket) {
       setSocket(newSocket);
@@ -50,8 +51,24 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
         );
         dispatch(updateGroupListOrder(data?.chatId));
       });
+
+      // socket.on("new-group-creation", (data) => {
+      //   console.log("Group Creation: ", data);
+      //   dispatch(addGroupList(data))
+
+      //   if (data?.chatId) {
+      //     socket.emit("join-chat", data?.chatId);
+      //   }
+      // });
     }
-  }, [socket]);
+
+    return () => {
+      if (socket) {
+        socket.off("receive-message");
+        // socket.off("new-group-creation");
+      }
+    };
+  }, [socket, dispatch]);
   useEffect(() => {
     getGroups().then((res) => dispatch(setGroupList(res)));
   }, [dispatch]);
@@ -62,8 +79,8 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
     }
   });
   return (
-    <div className="bg-gray-900 w-96 h-screen font-sans shadow-lg border-r border-gray-800 overflow-y-auto scrollbar-none">
-      <div className="flex flex-col py-2 pt-4">
+    <div className="bg-gray-900 w-96 h-screen font-sans shadow-lg border-r border-gray-800 flex flex-col">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 py-2 pb-24">
         {searchedGroup.map(({ group, chatId, lastMessage }) => (
           <div key={group?._id} className="flex flex-col">
             <div
@@ -75,22 +92,9 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
                   : "bg-gray-900 hover:bg-gray-800 hover:border-b-2 hover:border-purple-400"
               }`}
             >
-              {/* Friend's Image */}
+              {/* Group Avatar */}
               <div className="relative">
-              <OverlappingAvatars avatars={group?.avatar} />
-                {/* <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-white flex items-center justify-center overflow-hidden shadow-md">
-                  {group.avatar ? (
-                    <Image
-                      src={group.groupIcon}
-                      height={48}
-                      width={48}
-                      alt="Friend's Image"
-                      className="rounded-full object-cover h-16 w-16"
-                    />
-                  ) : (
-                    <span className="text-xl text-gray-300">👤</span>
-                  )}
-                </div> */}
+                <OverlappingAvatars avatars={group?.avatar} />
                 {/* Active Status Indicator */}
                 <span
                   className={`h-3 w-3 border border-gray-900 rounded-full absolute ${
@@ -99,12 +103,12 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
                 ></span>
               </div>
 
-              {/* Friend's Name */}
-              <div className="flex flex-col gap-0.5 truncate">
+              {/* Group Name and Last Message */}
+              <div className="flex flex-col gap-0.5 flex-1 truncate">
                 <div className="text-base font-medium text-gray-100 truncate">
                   {group?.groupName}
                 </div>
-                {/* Optional: Last Message Preview */}
+                {/* Last Message Preview */}
                 <div className="text-sm text-gray-400 truncate max-w-full">
                   {(lastMessage?.sender === userInfo._id ? (
                     <span className="font-bold">
@@ -128,3 +132,4 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
 };
 
 export default GroupList;
+

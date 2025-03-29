@@ -35,6 +35,10 @@ const groupListSlice = createSlice({
         return group;
       });
     },
+
+    addGroupList: (state, action) => {
+      state.groupList = [...state.groupList, action.payload];
+    },
     removeGroupList: (state) => {
       state.groupList = [];
     },
@@ -46,5 +50,6 @@ export const {
   updateGroupListOrder,
   updateLastMessageGroup,
   removeGroupList,
+  addGroupList,
 } = groupListSlice.actions;
 export default groupListSlice.reducer;

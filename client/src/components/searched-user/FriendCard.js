@@ -1,26 +1,43 @@
-import axios from "axios";
+import sendFriendRequest from "@/app/api/sendFriendRequest";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 
 const FriendCard = ({ username, avatar, isOnline, _id }) => {
-  const sendRequest = async (id) => {
-    try {
-      const res = await axios.post(
-        `http://localhost:4000/request/sendRequest/${id}`,
-        {},
-        { withCredentials: true }
-      );
 
-      if (res.data) {
-        toast.success(res.data.message);
-      }
-      console.log(res.data);
-    } catch (error) {
-      if (error.response.status === 409) {
-        toast.error(error.response.data.message);
-      } else {
-        console.error(error);
-      }
+  const [socket , setSocket] = useState(null);
+  useEffect(() => {
+    const newSocket = io("http://localhost:4000", {
+      withCredentials: true,
+    });
+
+    if (newSocket) {
+      setSocket(newSocket);
     }
+
+    return () => {
+      newSocket.disconnect();
+    }
+  }, [])
+
+
+  useEffect(()=> {
+
+    if (socket) {
+
+    }
+  },[socket])
+  const sendRequest =  (id) => {
+    console.log(id)
+    sendFriendRequest(id).then((res) => {
+      toast.success(res);
+
+      if (socket) {
+        socket.emit("new-friend-request", id);
+      }
+    }).catch((e) => {
+      toast.error(e);
+    })
   };
   return (
     <div className="flex items-center justify-between bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-purple-500 transition-all duration-200">

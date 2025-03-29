@@ -15,7 +15,7 @@ const app = Router();
 
 app.use(verifyLogin);
 app.post("/makeGroup", createGroup);
-app.post("/deleteGroup", deleteGroup);
+app.delete("/deleteGroup/:id", deleteGroup);
 app.put("/addMember", addMember);
 app.post("/removeMember", removeMember);
 app.delete("/leaveGroup/:id", leaveGroup);

@@ -10,32 +10,53 @@ import {
 import { setGroupList } from "@/lib/redux/features/groupListSlice";
 import { Check, CircleMinus, Plus } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { io } from "socket.io-client";
 
 const AddMembers = ({ chatId }) => {
   const { friendList } = useSelector((state) => state.friendList);
   const dispatch = useDispatch();
+  const [socket, setSocket] = useState(null);
 
   const { handleSubmit } = useForm();
   const [selectedFriends, setSelectedFriends] = useState([]);
 
   const addFriend = (friend) => {
     if (!selectedFriends.some((f) => f._id === friend._id)) {
-      setSelectedFriends((prev) => [...prev, friend._id]);
+      setSelectedFriends((prev) => [...prev, friend]);
     }
   };
 
+  // useEffect(() => {
+  //   const newSocket = io("http://localhost:4000", { withCredentials: true });
+  //   if (newSocket) {
+  //     setSocket(newSocket);
+  //   }
+  // }, [])
+
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on("new-member", (data) => {
+  //       dispatch(setGroupList(data));
+  //     });
+  //   }
+  // }, [socket]);
+
   const onSubmit = async (data) => {
     const groupID = chatId;
-    const memberID = selectedFriends;
+    const memberID = selectedFriends?.map((f) => f?._id);
+    const members = selectedFriends
 
     addGroupMember(groupID, memberID)
       .then((res) => {
         toast.success(res)
-        getGroups().then((res) => dispatch(setGroupList(res)));
+
+        // if (socket) {
+        //   socket.emit("addMember", { groupID, members });
+        // }
       })
       .catch((err) => toast.error(err));
   };
@@ -78,7 +99,7 @@ const AddMembers = ({ chatId }) => {
                         <div>{friend.username}</div>
                       </div>
                       <div className="flex gap-2">
-                        {selectedFriends.includes(friend._id) ? (
+                        {selectedFriends.map((f) => f._id).includes(friend._id) ? (
                           <>
                             <Check size={20} className="text-purple-500" />
                             <CircleMinus
@@ -86,7 +107,7 @@ const AddMembers = ({ chatId }) => {
                               className="text-red-500"
                               onClick={() =>
                                 setSelectedFriends((prev) =>
-                                  prev.filter((f) => f !== friend._id)
+                                  prev.filter((f) => f._id !== friend._id)
                                 )
                               }
                             />

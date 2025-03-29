@@ -19,7 +19,6 @@ const GroupChat = ({ selectGroup, chatId }) => {
   const dispatch = useDispatch();
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
-  console.log(chatId);
 
   useEffect(() => {
     const getMessages = async () => {
