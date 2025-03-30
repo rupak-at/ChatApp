@@ -12,7 +12,9 @@ const friendRequestDetailsSlice = createSlice({
       state.friendRequestDetails = action.payload;
     },
     removeFriendRequestDetails: (state, action) => {
-      state.friendRequestDetails = [];
+      const requestId = action.payload;
+      const filteredRequests = state.friendRequestDetails.filter((r) => r.requestId !== requestId);
+      state.friendRequestDetails = filteredRequests;
     },
   },
 });

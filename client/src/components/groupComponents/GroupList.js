@@ -1,5 +1,6 @@
 import {
   addGroupList,
+  groupRemoveAfterDeletion,
   setGroupList,
   updateGroupListOrder,
   updateLastMessageGroup,
@@ -40,9 +41,7 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
 
   useEffect(() => {
     if (socket) {
-      console.log(socket);
       socket.on("receive-message", (data) => {
-        console.log(data);
         dispatch(
           updateLastMessageGroup({
             chatId: data?.chatId,
@@ -53,17 +52,48 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
         dispatch(updateGroupListOrder(data?.chatId));
       });
 
-        socket.on("new-group-creation", (data) => { 
-          console.log(data);
-        })
-        
+      socket.on("new-group-creation", (data) => {
+        // console.log(data);
+        //showing to participants only
+        if (data.group.participants.map((f) => f._id).includes(userInfo._id)) {
+          dispatch(addGroupList(data));
+        }
+      });
 
+      socket.on("group-deleted", (data) => {
+        dispatch(groupRemoveAfterDeletion(data))
+      })
+
+      socket.on("member-added", (d) => {
+        console.log("New member added:", d);
+        if (d?.group?.participants?.some((f) => f._id === userInfo._id)) {
+          const chatExists = groupList.some((g) => g?.chatId === d?.chatId);
+          if (!chatExists) {
+            dispatch(addGroupList(d));
+            console.log("Group added to the list");
+          } else {
+            console.log("Group already exists in the list");
+          }
+        } else {
+          console.log("User is not a participant of the added group");
+        }
+      });
+
+      socket.on("member-removed" , (d) => {
+        console.log(d)
+          if (userInfo._id === d?.memberID) {
+            dispatch(groupRemoveAfterDeletion(d?.groupID))
+          }
+      });
     }
 
     return () => {
       if (socket) {
         socket.off("receive-message");
         socket.off("new-group-creation");
+        socket.off("group-deleted")
+        socket.off("member-added")
+        socket.off("member-removed")
       }
     };
   }, [socket, dispatch]);
@@ -130,4 +160,3 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
 };
 
 export default GroupList;
-

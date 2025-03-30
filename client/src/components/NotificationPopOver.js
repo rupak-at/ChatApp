@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import getFriends from "@/app/api/getFriends";
 import { setFriendList } from "@/lib/redux/features/friendListSlice";
+import { removeFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
 
 const NotificationPopOver = () => {
   const requests = useSelector(
@@ -24,6 +25,7 @@ const NotificationPopOver = () => {
       if (data){
         toast.success("Request Accepted");
         getFriends().then((res) => dispatch(setFriendList(res)));
+        dispatch(removeFriendRequestDetails(requestId)); 
       }
     } catch (error) {
       if (error.status){

@@ -13,7 +13,7 @@ const createGroup = async (name, members) => {
     } catch (error) {
         if (error.status) {
           console.log(error.response.data.message);
-          return "Some Error Occurred";
+          return error.response.data.message;
         }
       }
 };

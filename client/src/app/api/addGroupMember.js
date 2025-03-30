@@ -8,12 +8,14 @@ const addGroupMember = async (groupID, memberID) => {
           { withCredentials: true }
         );
         if (data) {
-          return "Added SuccessFully"
+          // return "Added SuccessFully"
+          return data?.message
         }
       } catch (error) {
         if (error.status) {
           console.log(error.response.data.message);
-          return "Some Error Occurred";
+          // return "Some Error Occurred";
+          return error.response.data.message
         }
       }
 }

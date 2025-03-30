@@ -28,40 +28,40 @@ const createGroup = async (req, res) => {
       groupAdmin: req.userID,
     });
 
-          //to send data through socket
-          const populatedGroup = await GroupChat.findById(newGroup._id)
-          .populate({
-            path: "participants",
-            select: "-password -refreshToken",
-          })
-          .lean();
-      
-          const avatar = [
-            populatedGroup.participants[0]?.avatar, 
-            populatedGroup.participants[1]?.avatar, 
-            populatedGroup.participants[2]?.avatar
-          ];
-      
-          const groupData = {
-            chatId: populatedGroup._id.toString(),
-            group: {...populatedGroup, avatar},
-            lastMessage: null,
-          };
-    
-          const io = req.app.get("io");
-          const onlineUser = global.onlineUser;
-          console.log(onlineUser);
-          members.forEach((memberId) => {
-            if (memberId !== req.userID) {
-              const socketId = onlineUser[memberId];
-              if (socketId) {
-                io.to(socketId).emit("new-group-creation", groupData);
-                console.log(groupData);
-                console.log("Emitting new group creation");
-              }
-            }
-          })
-  
+    //to send data through socket
+    const populatedGroup = await GroupChat.findById(newGroup._id)
+      .populate({
+        path: "participants",
+        select: "-password -refreshToken",
+      })
+      .lean();
+
+    const avatar = [
+      populatedGroup.participants[0]?.avatar,
+      populatedGroup.participants[1]?.avatar,
+      populatedGroup.participants[2]?.avatar,
+    ];
+
+    const groupData = {
+      chatId: populatedGroup._id.toString(),
+      group: { ...populatedGroup, avatar },
+      lastMessage: null,
+    };
+
+    const io = req.app.get("io");
+    const onlineUser = global.onlineUser;
+    // console.log(onlineUser);
+    members.forEach((memberId) => {
+      if (memberId !== req.userID) {
+        const socketId = onlineUser[memberId];
+        if (socketId) {
+          io.emit("new-group-creation", groupData);
+          // console.log(groupData);
+          // console.log("Emitting new group creation");
+        }
+      }
+    });
+
     return res
       .status(201)
       .json({ message: "Group Created Successfully", group: newGroup });
@@ -73,7 +73,7 @@ const createGroup = async (req, res) => {
 
 const deleteGroup = async (req, res) => {
   try {
-    const groupID  = req.params.id;
+    const groupID = req.params.id;
 
     //check for valid mongodb _id
     if (!mongoose.isValidObjectId(groupID)) {
@@ -100,6 +100,10 @@ const deleteGroup = async (req, res) => {
     }
 
     await group.deleteOne();
+
+    const io = req.app.get("io");
+
+    io.emit("group-deleted", groupID);
 
     return res
       .status(200)
@@ -132,6 +136,20 @@ const addMember = async (req, res) => {
       return res.status(401).json({ message: "You Are Not In The Group" });
     }
 
+    if (memberID.some((id) => group.participants.includes(id))) {
+      return res.status(400).json({ message: "Member Already In The Group" });
+    };
+
+    const newMembersInfo = await User.find({ _id: { $in: memberID } }).select(
+      "-password -refreshToken"
+    );
+
+    if (newMembersInfo.length !== memberID.length) {
+      return res.status(400).json({ message: "Invalid Member ID" });
+    }
+
+    const userNames = newMembersInfo.map((user) => user.username);
+
     const oldMembers = group.participants;
 
     const newMembers = memberID.filter((id) => !oldMembers.includes(id));
@@ -139,6 +157,31 @@ const addMember = async (req, res) => {
     group.participants = [...oldMembers, ...newMembers];
 
     await group.save();
+
+    //to send data through socket
+    const populatedGroup = await GroupChat.findById(groupID)
+      .populate({
+        path: "participants",
+        select: "-password -refreshToken",
+      })
+      .lean();
+
+    const avatar = [
+      populatedGroup.participants[0]?.avatar,
+      populatedGroup.participants[1]?.avatar,
+      populatedGroup.participants[2]?.avatar,
+    ];
+
+    const groupData = {
+      chatId: populatedGroup._id.toString(),
+      group: { ...populatedGroup, avatar },
+      lastMessage: { content: "Start Chat In New Group" },
+    };
+    console.log(populatedGroup._id.toString());
+
+    const io = req.app.get("io");
+    io.emit("member-added", groupData);
+
 
     return res
       .status(200)
@@ -183,6 +226,9 @@ const removeMember = async (req, res) => {
     }
 
     await group.updateOne({ $pull: { participants: memberID } });
+
+    const io = req.app.get("io");
+    io.emit("member-removed", {groupID, memberID});
 
     return res
       .status(200)
@@ -302,7 +348,7 @@ const sendMessage = async (req, res) => {
     const group = await GroupChat.findById(chatId);
 
     if (!group) {
-      return res.status(404).json({ message: "Group Not Found" });
+      return res.status(404).json({ message: "Group Not Found | Deleted" });
     }
 
     if (!group.participants.includes(req.userID)) {

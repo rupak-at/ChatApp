@@ -10,6 +10,7 @@ import { io } from "socket.io-client";
 import { updateGroupListOrder } from "@/lib/redux/features/groupListSlice";
 import OverlappingAvatars from "./GroupOverLapingImage";
 import GroupInfoPopOver from "./GroupInfoPopOver";
+import toast from "react-hot-toast";
 
 const GroupChat = ({ selectGroup, chatId }) => {
   const messageConatinerRef = useRef();
@@ -98,6 +99,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
       e.target.message.value = "";
     } catch (error) {
       if (error.status) {
+        toast.error(error.response.data.message);
         console.log(error.response.data.message);
       }
     }

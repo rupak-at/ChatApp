@@ -39,6 +39,12 @@ const groupListSlice = createSlice({
     addGroupList: (state, action) => {
       state.groupList = [...state.groupList, action.payload];
     },
+
+    groupRemoveAfterDeletion : (state, action) => {
+      const chatId = action.payload
+      const filteredGroupList = state.groupList.filter((g) => g?.chatId !== chatId)
+      state.groupList = filteredGroupList
+    },
     removeGroupList: (state) => {
       state.groupList = [];
     },
@@ -51,5 +57,6 @@ export const {
   updateLastMessageGroup,
   removeGroupList,
   addGroupList,
+  groupRemoveAfterDeletion,
 } = groupListSlice.actions;
 export default groupListSlice.reducer;
