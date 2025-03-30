@@ -12,8 +12,8 @@ const layout = ({ children }) => {
 
   useEffect(() => {
     if (user && user._id) {
-      socket.emit("login", user._id);
-    } else {
+        socket.emit("login", user._id);
+            } else {
       router.push("/login");
     }
 

@@ -28,38 +28,39 @@ const createGroup = async (req, res) => {
       groupAdmin: req.userID,
     });
 
-      //to send data through socket
-      const populatedGroup = await GroupChat.findById(newGroup._id)
-      .populate({
-        path: "participants",
-        select: "-password -refreshToken",
-      })
-      .lean();
-  
-      const avatar = [
-        populatedGroup.participants[0]?.avatar, 
-        populatedGroup.participants[1]?.avatar, 
-        populatedGroup.participants[2]?.avatar
-      ];
-  
-      const groupData = {
-        chatId: populatedGroup._id.toString(),
-        group: {...populatedGroup, avatar},
-        lastMessage: null,
-      };
-
-      const io = req.app.get("io");
-      const onlineUser = global.onlineUser;
-      console.log(onlineUser);
-      members.forEach((memberId) => {
-        if (memberId !== req.userID) {
-          const socketId = onlineUser[memberId];
-          if (socketId) {
-            io.to(socketId).emit("new-group-creation", groupData);
-            console.log("Emitting new group creation");
-          }
-        }
-      })
+          //to send data through socket
+          const populatedGroup = await GroupChat.findById(newGroup._id)
+          .populate({
+            path: "participants",
+            select: "-password -refreshToken",
+          })
+          .lean();
+      
+          const avatar = [
+            populatedGroup.participants[0]?.avatar, 
+            populatedGroup.participants[1]?.avatar, 
+            populatedGroup.participants[2]?.avatar
+          ];
+      
+          const groupData = {
+            chatId: populatedGroup._id.toString(),
+            group: {...populatedGroup, avatar},
+            lastMessage: null,
+          };
+    
+          const io = req.app.get("io");
+          const onlineUser = global.onlineUser;
+          console.log(onlineUser);
+          members.forEach((memberId) => {
+            if (memberId !== req.userID) {
+              const socketId = onlineUser[memberId];
+              if (socketId) {
+                io.to(socketId).emit("new-group-creation", groupData);
+                console.log(groupData);
+                console.log("Emitting new group creation");
+              }
+            }
+          })
   
     return res
       .status(201)

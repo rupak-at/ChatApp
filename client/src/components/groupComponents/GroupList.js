@@ -40,6 +40,7 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
 
   useEffect(() => {
     if (socket) {
+      console.log(socket);
       socket.on("receive-message", (data) => {
         console.log(data);
         dispatch(
@@ -52,20 +53,17 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
         dispatch(updateGroupListOrder(data?.chatId));
       });
 
-      // socket.on("new-group-creation", (data) => {
-      //   console.log("Group Creation: ", data);
-      //   dispatch(addGroupList(data))
+        socket.on("new-group-creation", (data) => { 
+          console.log(data);
+        })
+        
 
-      //   if (data?.chatId) {
-      //     socket.emit("join-chat", data?.chatId);
-      //   }
-      // });
     }
 
     return () => {
       if (socket) {
         socket.off("receive-message");
-        // socket.off("new-group-creation");
+        socket.off("new-group-creation");
       }
     };
   }, [socket, dispatch]);

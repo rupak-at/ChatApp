@@ -45,7 +45,7 @@ const Search = () => {
           { withCredentials: true }
         );
   
-        console.log(res.data.user);
+        // console.log(res.data.user);
         setUsers(res.data.user);
       } catch (error) {
         toast(error.response.data.message, {
