@@ -1,40 +1,11 @@
 import sendFriendRequest from "@/app/api/sendFriendRequest";
-import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { io } from "socket.io-client";
 
 const FriendCard = ({ username, avatar, isOnline, _id }) => {
 
-  const [socket , setSocket] = useState(null);
-  useEffect(() => {
-    const newSocket = io("http://localhost:4000", {
-      withCredentials: true,
-    });
-
-    if (newSocket) {
-      setSocket(newSocket);
-    }
-
-    return () => {
-      newSocket.disconnect();
-    }
-  }, [])
-
-
-  useEffect(()=> {
-
-    if (socket) {
-
-    }
-  },[socket])
   const sendRequest =  (id) => {
-    console.log(id)
     sendFriendRequest(id).then((res) => {
       toast.success(res);
-
-      if (socket) {
-        socket.emit("new-friend-request", id);
-      }
     }).catch((e) => {
       toast.error(e);
     })

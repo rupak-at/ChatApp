@@ -83,10 +83,11 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
     <div className="bg-gray-900 w-96 min-h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
       <div className="flex flex-col py-2 pb-5">
         {searchedFriends.map(({ friend, chatId, lastMessage }) => (
+          <div key={friend._id} className="flex flex-col" >
           <div
             onClick={() => onClickFriend(friend, chatId)}
             key={friend._id}
-            className={`flex items-center gap-3 mx-2 p-3 rounded-lg cursor-pointer transition-all ${
+            className={`flex items-center gap-3 mx-[1px] p-3 rounded-lg cursor-pointer transition-all ${
               chattingFriend?._id === friend?._id
                 ? "bg-gray-950 border-b-2 border-purple-500"
                 : "bg-gray-900 hover:bg-gray-800 hover:border-b-2 hover:border-purple-400"
@@ -134,6 +135,8 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
                 )) || "No messages yet"}
               </div>
             </div>
+          </div>
+          <div className="h-0 border border-gray-800"></div>
           </div>
         ))}
       </div>

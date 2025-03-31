@@ -126,11 +126,6 @@ const GroupChat = ({ selectGroup, chatId }) => {
           <div className="flex items-center gap-4">
             <div className="relative">
               <OverlappingAvatars avatars={selectGroup?.avatar}/>
-              <span
-                className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
-                  selectGroup?.isActive ? "bg-green-500" : "bg-gray-500"
-                } absolute bottom-0 right-0`}
-              ></span>
             </div>
             <div className="flex flex-col">
               <div className="text-lg font-semibold text-gray-100">

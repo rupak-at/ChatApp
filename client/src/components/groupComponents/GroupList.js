@@ -61,8 +61,8 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
       });
 
       socket.on("group-deleted", (data) => {
-        dispatch(groupRemoveAfterDeletion(data))
-      })
+        dispatch(groupRemoveAfterDeletion(data));
+      });
 
       socket.on("member-added", (d) => {
         console.log("New member added:", d);
@@ -79,11 +79,11 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
         }
       });
 
-      socket.on("member-removed" , (d) => {
-        console.log(d)
-          if (userInfo._id === d?.memberID) {
-            dispatch(groupRemoveAfterDeletion(d?.groupID))
-          }
+      socket.on("member-removed", (d) => {
+        console.log(d);
+        if (userInfo._id === d?.memberID) {
+          dispatch(groupRemoveAfterDeletion(d?.groupID));
+        }
       });
     }
 
@@ -91,9 +91,9 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
       if (socket) {
         socket.off("receive-message");
         socket.off("new-group-creation");
-        socket.off("group-deleted")
-        socket.off("member-added")
-        socket.off("member-removed")
+        socket.off("group-deleted");
+        socket.off("member-added");
+        socket.off("member-removed");
       }
     };
   }, [socket, dispatch]);
@@ -109,51 +109,52 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
   return (
     <div className="bg-gray-900 w-96 h-screen font-sans shadow-lg border-r border-gray-800 flex flex-col">
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 py-2 pb-24">
-        {searchedGroup.map(({ group, chatId, lastMessage }) => (
-          <div key={group?._id} className="flex flex-col">
-            <div
-              onClick={() => handleGroupSelect(group, chatId)}
-              key={group?._id}
-              className={`flex items-center gap-3 p-3 mx-[2px] rounded-lg cursor-pointer transition-all ${
-                selectGroup?._id === group?._id
-                  ? "bg-gray-950 border-b-2 border-purple-500"
-                  : "bg-gray-900 hover:bg-gray-800 hover:border-b-2 hover:border-purple-400"
-              }`}
-            >
-              {/* Group Avatar */}
-              <div className="relative">
-                <OverlappingAvatars avatars={group?.avatar} />
-                {/* Active Status Indicator */}
-                <span
-                  className={`h-3 w-3 border border-gray-900 rounded-full absolute ${
-                    group?.isActive ? "bg-green-500" : "bg-gray-500"
-                  } bottom-0 right-1`}
-                ></span>
-              </div>
+        {searchedGroup.map(({ group, chatId, lastMessage }) => {
+          return (
+            <div key={group?._id} className="flex flex-col">
+              <div
+                onClick={() => handleGroupSelect(group, chatId)}
+                key={group?._id}
+                className={`flex items-center gap-3 p-3 mx-[2px] rounded-lg cursor-pointer transition-all ${
+                  selectGroup?._id === group?._id
+                    ? "bg-gray-950 border-b-2 border-purple-500"
+                    : "bg-gray-900 hover:bg-gray-800 hover:border-b-2 hover:border-purple-400"
+                }`}
+              >
+                {/* Group Avatar */}
+                <div className="relative">
+                  <OverlappingAvatars avatars={group?.avatar} />
+                  <span
+                    className={`h-3 w-3 border border-gray-900 rounded-full absolute ${
+                      group?.participants?.some((f) => f._id === userInfo._id) ? "bg-green-500" : "bg-gray-500"
+                    } bottom-0 right-1`}
+                  ></span>
+                </div>
 
-              {/* Group Name and Last Message */}
-              <div className="flex flex-col gap-0.5 flex-1 truncate">
-                <div className="text-base font-medium text-gray-100 truncate">
-                  {group?.groupName}
-                </div>
-                {/* Last Message Preview */}
-                <div className="text-sm text-gray-400 truncate max-w-full">
-                  {(lastMessage?.sender === userInfo._id ? (
-                    <span className="font-bold">
-                      You:{" "}
-                      <span className="text-xs font-normal">
-                        {lastMessage?.content}
+                {/* Group Name and Last Message */}
+                <div className="flex flex-col gap-0.5 flex-1 truncate">
+                  <div className="text-base font-medium text-gray-100 truncate">
+                    {group?.groupName}
+                  </div>
+                  {/* Last Message Preview */}
+                  <div className="text-sm text-gray-400 truncate max-w-full">
+                    {(lastMessage?.sender === userInfo._id ? (
+                      <span className="font-bold">
+                        You:{" "}
+                        <span className="text-xs font-normal">
+                          {lastMessage?.content}
+                        </span>
                       </span>
-                    </span>
-                  ) : (
-                    lastMessage?.content
-                  )) || "No messages yet"}
+                    ) : (
+                      lastMessage?.content
+                    )) || "No messages yet"}
+                  </div>
                 </div>
               </div>
+              <div className="h-0 border border-gray-800"></div>
             </div>
-            <div className="h-0 border border-gray-800"></div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

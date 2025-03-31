@@ -81,7 +81,7 @@ const Search = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-col gap-4 mt-4 w-96 h-28">
+      <div className="grid grid-cols-3 gap-4 mt-4 w-[85%] h-28">
         {users.length > 0 &&
           users.map((friend) => <FriendCard key={friend._id} {...friend} />)}
       </div>
