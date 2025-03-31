@@ -113,7 +113,7 @@ const FriendChat = ({ friend, chatId }) => {
         setMessages(res.data.messages);
       } catch (error) {
         setMessages([]);
-        console.log(error.response.data.message);
+        // console.log(error.response.data.message);
       }
     };
     getMessages();

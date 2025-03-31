@@ -9,16 +9,27 @@ const friendRequestDetailsSlice = createSlice({
   initialState,
   reducers: {
     setFriendRequestDetails: (state, action) => {
-      state.friendRequestDetails = action.payload;
+      const nonDuplicateRequests = action.payload.filter((r) => !state.friendRequestDetails.some((request) => request.requestId === r.requestId));
+      state.friendRequestDetails = [...state.friendRequestDetails, ...nonDuplicateRequests];
+    },
+    addFriendRequestDetails: (state, action) => {
+      if (state.friendRequestDetails.length === 0) {
+        state.friendRequestDetails = [action.payload];
+      }else {
+        state.friendRequestDetails = [...state.friendRequestDetails, action.payload];
+      }
     },
     removeFriendRequestDetails: (state, action) => {
       const requestId = action.payload;
       const filteredRequests = state.friendRequestDetails.filter((r) => r.requestId !== requestId);
       state.friendRequestDetails = filteredRequests;
     },
+    removeWhileLogout: (state) =>{
+      state.friendRequestDetails = [];
+    },
   },
 });
 
-export const { setFriendRequestDetails, removeFriendRequestDetails } =
+export const { setFriendRequestDetails, removeFriendRequestDetails, addFriendRequestDetails, removeWhileLogout } =
   friendRequestDetailsSlice.actions;
 export default friendRequestDetailsSlice.reducer;

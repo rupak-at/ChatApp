@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import UpdateInfo from "./UpdateInfo";
 import { Bell, Search } from "lucide-react";
 import { removeUserInfo } from "@/lib/redux/features/loginInfoSlice";
-import { removeFriendRequestDetails, setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
+import { addFriendRequestDetails, removeFriendRequestDetails, removeWhileLogout, setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
 import { io } from "socket.io-client";
 import {
   removeFriendList,
@@ -80,8 +80,22 @@ const NavBar = () => {
       socket.on("user-offline", (userId) => {
         dispatch(updateFriendOnlineStatus({ userId, isOnline: false }));
       });
+      socket.on("new-friend-request", (data) => {
+        const d = data[0]
+        if (d.receiver === userInfo?._id) {
+          console.log("receiver end");
+          dispatch(addFriendRequestDetails(d));
+        }
+      })
     }
-  }, [socket]);
+
+    return () => {
+      if (socket) {
+        socket.off("user-offline");
+        socket.off("new-friend-request");
+      }
+    }
+  }, [socket, userInfo?._id]);
 
   const handleLogout = async () => {
     try {
@@ -99,7 +113,7 @@ const NavBar = () => {
         dispatch(removeUserInfo());
         dispatch(removeFriendList());
         dispatch(removeGroupList());
-        dispatch(removeFriendRequestDetails())
+        dispatch(removeWhileLogout());
         router.push("/login");
       }
     } catch (error) {

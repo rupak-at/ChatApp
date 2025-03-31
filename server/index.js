@@ -70,9 +70,6 @@ io.on("connection", (socket) => {
     io.to(data.chatId).emit("started-typing", data);
   });
 
-  socket.on("new-friend-request", (data) => {
-    io.to(data).emit("new-friend-request", data);
-  })
   // Join a room based on chatId
   socket.on("join-chat", (chatId) => {
     socket.join(chatId);

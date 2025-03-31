@@ -40,6 +40,7 @@ const NotificationPopOver = () => {
       const {data} = await axios.post(`http://localhost:4000/request/rejectRequest/${requestId}`,{}, {withCredentials: true});
         if (data) {
             toast.success("Request Declined");
+            dispatch(removeFriendRequestDetails(requestId));
         }
     } catch (error) {
       if (error.status){
@@ -77,7 +78,7 @@ const NotificationPopOver = () => {
                 <div className="flex items-center gap-3">
                   <div>
                     <Image
-                      src={sender.avatar}
+                      src={sender?.avatar}
                       height={50}
                       width={50}
                       alt="Profile_image"
@@ -86,9 +87,9 @@ const NotificationPopOver = () => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <h4 className="font-medium leading-none text-white ">
-                      {sender.username}
+                      {sender?.username}
                     </h4>
-                    <p className="text-sm text-zinc-400">{sender.email}</p>
+                    <p className="text-sm text-zinc-400">{sender?.email}</p>
                   </div>
                 </div>
                 <div className="flex gap-1 items-center">

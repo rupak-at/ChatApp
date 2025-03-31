@@ -32,6 +32,37 @@ const sendRequest = async(req, res) => {
       receiver: receiverId
     })
 
+    //to socket
+
+    const request = await FriendRequest.find({
+      $and: [
+        { sender: req.userID },
+        { status: 'pending' },
+        { receiver: receiverId },
+      ],
+    }).populate({
+      path: "sender",
+      select: "-password -refreshToken"
+    });
+
+    const formattedData = request.map((f) => {
+      return {
+        requestId: f._id,
+        sender: {
+          _id: f.sender._id,
+          username: f.sender.username,
+          email: f.sender.email,
+          isOnline: f.sender.isOnline,
+          avatar: f.sender.avatar
+        },
+        receiver: f.receiver.toString()
+      }
+    })
+
+    const io = req.app.get('io')
+    io.emit('new-friend-request', formattedData)
+
+
     return res.status(201).json({message: 'Request Sent Successfully'})
   } catch (error) {
     console.error(error)
