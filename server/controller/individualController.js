@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Message } from "../model/messageModel.js";
 import { IndividualChat } from "../model/singleChatModel.js";
 import { User } from "../model/userModel.js";
+import { FriendRequest } from "../model/friendRequestModel.js";
 
 const getMyMessages = async (req, res) => {
   try {
@@ -52,7 +53,17 @@ const disconnectFriend = async (req, res) => {
         .json({ message: "You Are Not In The Friend List" });
     }
 
+    const userIds = friend.participants?.map((id) => id.toString());
+    //delete from request as well
+    await FriendRequest.deleteOne({ $or: [{ sender: userIds[0], receiver: userIds[1] }, { sender: userIds[1], receiver: userIds[0] }] });
+
     await friend.deleteOne();
+    //remove all messages as well
+    await Message.deleteMany({ chatId: chatId });
+
+    //socket
+    const io = req.app.get("io");
+    io.emit("unfriend", chatId);
 
     return res
       .status(200)

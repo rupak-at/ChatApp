@@ -79,13 +79,13 @@ const acceptRequest = async (req, res) => {
       return res.status(400).json({message: 'All Field Are Required'})
     }
 
-    const friendRequest = await FriendRequest.findById(requestId)
+    const friendRequest = await FriendRequest.findById(requestId).populate("sender receiver").select("-password -refreshToken")
 
     if (!friendRequest){
       return res.status(404).json({message: 'Request Not Found'})
     }
 
-    if (friendRequest.receiver.toString() !== req.userID) {
+    if (friendRequest.receiver._id.toString() !== req.userID) {
       return res.status(401).json({message: 'Unauthorized Request'})
     }
 
@@ -94,10 +94,19 @@ const acceptRequest = async (req, res) => {
     await friendRequest.save()
 
     const individualChat = await IndividualChat.create({
-      participants: [friendRequest.sender, friendRequest.receiver]
+      participants: [friendRequest.sender._id, friendRequest.receiver._id]
     })
 
     await individualChat.save()
+    //socket
+    const io = req.app.get('io')
+    const formattedData = {
+      chatId: individualChat._id,
+      friend: friendRequest.receiver,
+      lastMessage: null,
+      senderId: friendRequest.sender._id.toString(),
+    }
+    io.emit('new-friend', formattedData)
 
     return res.status(200).json({message: 'Request Accepted Successfully And You Can Now Chat'})
     

@@ -11,7 +11,7 @@ const app = Router();
 app.use(verifyLogin);
 
 app.get("/myMessages/:chatId", getMyMessages);
-app.get("/disconnect/:chatId", disconnectFriend);
+app.delete("/remove/:chatId", disconnectFriend);
 app.post("/message/:chatId", sendMessage);
 
 export default app;

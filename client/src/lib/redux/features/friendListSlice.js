@@ -45,6 +45,12 @@ const friendListSlice = createSlice({
         return friend;
       });
     },
+    addFriendFromSocket: (state, action) => {
+      state.friendList = [...state.friendList, action.payload];
+    },
+    removeFriendFromSocket: (state, action) => {
+      state.friendList = state.friendList.filter((f) => f.chatId !== action.payload);
+    },
     removeFriendList: (state) => {
       state.friendList = [];
     },
@@ -57,5 +63,7 @@ export const {
   updateFriendOnlineStatus,
   changeFriendListOrder,
   updateLastMessage,
+  addFriendFromSocket,
+  removeFriendFromSocket,
 } = friendListSlice.actions;
 export default friendListSlice.reducer;

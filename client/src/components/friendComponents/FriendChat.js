@@ -12,6 +12,7 @@ import {
   changeFriendListOrder,
   updateFriendOnlineStatus,
 } from "@/lib/redux/features/friendListSlice";
+import { Howl } from "howler";
 
 const FriendChat = ({ friend, chatId }) => {
   const friends = useSelector((state) => state.friendList.friendList);
@@ -25,6 +26,11 @@ const FriendChat = ({ friend, chatId }) => {
 
   const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
   const isOnline = selectedFriend?.friend?.isOnline;
+
+  const sound = new Howl({
+    src: ["/msg.mp3"],
+    volume: 0.5
+  })
 
   //make io connection
   useEffect(() => {
@@ -52,6 +58,7 @@ const FriendChat = ({ friend, chatId }) => {
       socket.on("receive-message", (message) => {
         setMessages((prev) => [...prev, message]);
         dispatch(changeFriendListOrder(message?.chatId));
+        sound.play();
       });
 
       socket.on("user-online", (userId) => {
@@ -90,16 +97,18 @@ const FriendChat = ({ friend, chatId }) => {
   const handleMessageSent = async (e) => {
     e.preventDefault();
     const message = e.target.message.value;
-    try {
-      const res = await axios.post(
-        `http://localhost:4000/user/message/${chatId}`,
-        { content: message },
-        { withCredentials: true }
-      );
-      e.target.message.value = "";
-      setMessages([...messages, res.data.sendMessage]);
-    } catch (error) {
-      toast.error(error.response.data.message);
+    if (message.trim()){
+      try {
+        const res = await axios.post(
+          `http://localhost:4000/user/message/${chatId}`,
+          { content: message },
+          { withCredentials: true }
+        );
+        e.target.message.value = "";
+        setMessages([...messages, res.data.sendMessage]);
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
     }
   };
 
@@ -184,14 +193,14 @@ const FriendChat = ({ friend, chatId }) => {
               />
             </button>
             <div className="h-6 border-l border-gray-600 mx-1 flex items-center">
-              <UserInfoPopOver friend={friend} />
+              <UserInfoPopOver friend={friend} chatId={chatId} />
             </div>
           </div>
         </div>
 
         <div
           ref={messageConatinerRef}
-          className="flex-grow overflow-y-auto bg-gray-900 p-2 md:p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800"
+          className="flex-grow overflow-y-auto bg-gray-900 p-2 md:p-6 "
         >
           <div className="flex flex-col gap-4 max-w-4xl mx-auto">
             {messages.length > 0 ? (

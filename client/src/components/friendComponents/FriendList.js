@@ -1,7 +1,9 @@
 "use client";
 import getFriends from "@/app/api/getFriends";
 import {
+  addFriendFromSocket,
   changeFriendListOrder,
+  removeFriendFromSocket,
   setFriendList,
   updateFriendOnlineStatus,
   updateLastMessage,
@@ -47,18 +49,29 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
       });
 
       socket.on("receive-message", (message) => {
-        console.log(message);
         dispatch(
           updateLastMessage({ chatId: message?.chatId, lastMessage: message })
         );
         dispatch(changeFriendListOrder(message?.chatId));
       });
+
+      socket.on("new-friend", (d) => {
+        if (d.senderId === userInfo._id){
+          dispatch(addFriendFromSocket(d))
+        }
+      })
+
+      socket.on("unfriend", (chatId) => {
+        dispatch(removeFriendFromSocket(chatId))
+      })
     }
 
     return () => {
       if (socket) {
         socket.off("user-online");
         socket.off("receive-message");
+        socket.off("new-friend");
+        socket.off("unfriend");
       }
     };
   }, [socket]);
@@ -80,8 +93,8 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend }) => {
   }
 
   return (
-    <div className="bg-gray-900 w-96 min-h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-      <div className="flex flex-col py-2 pb-5">
+    <div className="bg-gray-900 w-96 h-screen font-sans border-r border-gray-800 shadow-lg overflow-y-auto ">
+      <div className="flex flex-col py-2 pb-5 h-screen overflow-auto">
         {searchedFriends.map(({ friend, chatId, lastMessage }) => (
           <div key={friend._id} className="flex flex-col" >
           <div
