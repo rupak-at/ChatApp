@@ -132,7 +132,7 @@ const NavBar = () => {
   };
 
   return (
-    <div className="h-screen w-20 bg-gray-900 text-white flex flex-col justify-between items-center py-4 border-r-2 border-gray-700">
+    <div className="h-screen z-999 w-20 bg-gray-900 text-white flex flex-col justify-between items-center py-4 border-r-2 border-gray-700">
       <div className="flex flex-col gap-2">
         {navItems.map((nav, id) => (
           <Link

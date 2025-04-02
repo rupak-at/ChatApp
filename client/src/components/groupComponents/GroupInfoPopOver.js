@@ -68,7 +68,7 @@ const GroupInfoPopOver = ({ selectGroup, chatId }) => {
                 {selectGroup?.groupName}
               </h4>
               {userInfo._id === selectGroup?.groupAdmin ? (
-                <Button onClick={() => handleGroupDeletion(chatId)}>Delete Group</Button>
+                <Button onClick={() => handleGroupDeletion(chatId)} className="text-sm text-slate-200 bg-red-500 hover:bg-red-600 transition-all duration-300">Delete Group</Button>
               ) : (
                 <Button
                   onClick={() => handleLeaveGroup(chatId)}

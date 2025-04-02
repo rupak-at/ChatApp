@@ -1,7 +1,10 @@
 import sendFriendRequest from "@/app/api/sendFriendRequest";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const FriendCard = ({ username, avatar, isOnline, _id }) => {
+  const {friendList} = useSelector((state) => state.friendList);
+  const friendIds = friendList.map((friend) => friend?.friend?._id);
 
   const sendRequest =  (id) => {
     sendFriendRequest(id).then((res) => {
@@ -32,12 +35,20 @@ const FriendCard = ({ username, avatar, isOnline, _id }) => {
           </p>
         </div>
       </div>
-      <button
-        onClick={() => sendRequest(_id)}
-        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
-      >
-        Add Friend
-      </button>
+      {
+        friendIds.includes(_id) ? (
+          <button className="w-[90px] bg-purple-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
+            Friends
+          </button>
+        ): (
+        <button
+          onClick={() => sendRequest(_id)}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
+        >
+          Add Friend
+        </button>
+        )
+      }
     </div>
   );
 };

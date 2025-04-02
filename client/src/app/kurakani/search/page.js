@@ -9,33 +9,11 @@ const Search = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
 
-  const handleSearch = async () => {
-    if (!search) {
-      toast("Type something!", {
-        icon: "🚫",
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-        position: "bottom-center",
-      });
-      return;
+  const searchedUser = users.filter((user) => {
+    if (user.username.toLowerCase().includes(search.toLowerCase())) {
+      return user;  
     }
-
-    if (search.length < 3) {
-      toast("Must Be More Than 3 Characters!", {
-        icon: "❌",
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-        duration: 1000,
-      });
-      return;
-    }
-  };
+  });
 
   useEffect(() => {
     const getAllUsers = async () => {
@@ -73,17 +51,17 @@ const Search = () => {
           placeholder="Search..."
           className="w-full h-12 border focus:outline-none focus:border-purple-500 transition-all duration-100 border-purple-500 rounded-2xl pr-10 p-2 text-white text-lg"
           onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         />
         <div className="absolute flex items-center right-2 top-2">
-          <button onClick={handleSearch}>
             <SearchIcon size={34} className="text-purple-500" />
-          </button>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 mt-4 w-[85%] h-28">
-        {users.length > 0 &&
-          users.map((friend) => <FriendCard key={friend._id} {...friend} />)}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4 mt-4 w-[85%] h-28">
+        {searchedUser.length > 0 ?
+          searchedUser.map((friend) => <FriendCard key={friend._id} {...friend} />)
+          :
+          (<div className="text-4xl text-gray-400 w-full text-center">No Users Found</div>)
+        }
       </div>
     </div>
   );

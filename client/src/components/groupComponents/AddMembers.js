@@ -67,7 +67,7 @@ const AddMembers = ({ chatId }) => {
         <Button
           variant="outline"
           className={
-            "text-white bg-zinc-700 border-none hover:bg-zinc-600 transition-all duration-300"
+            "text-white bg-purple-500 border-none hover:bg-purple-600 transition-all duration-300"
           }
         >
           <Plus size={30} />
