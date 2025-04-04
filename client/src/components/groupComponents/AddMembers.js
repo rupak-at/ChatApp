@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { setGroupList } from "@/lib/redux/features/groupListSlice";
+import { groupMemberCountUpdate, setGroupList } from "@/lib/redux/features/groupListSlice";
 import { Check, CircleMinus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -53,6 +53,7 @@ const AddMembers = ({ chatId }) => {
     addGroupMember(groupID, memberID)
       .then((res) => {
         toast.success(res)
+        dispatch(groupMemberCountUpdate({groupID, memberID, isAdd: true}))
 
         // if (socket) {
         //   socket.emit("addMember", { groupID, members });

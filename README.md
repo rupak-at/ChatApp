@@ -36,8 +36,8 @@ A real-time chat application built with modern web technologies.
 - [✅] Implement group chat functionality
 - [✅] Integrate Socket.io for real-time messaging
 - [✅] Handle message notifications in chat section
-- [  ] Handle request notification
-- [  ] Handle updates like group creation  
+- [✅] Handle request notification
+- [✅] Handle updates like group creation  
 
 ### Chat Features
 - [✅] Implement typing indicator in real-time chat

@@ -177,9 +177,9 @@ const NavBar = () => {
           <PopoverTrigger asChild>
             <img
               src={
-                userInfo?.avatar               }
-              // height={64}
-              // width={64}
+              userInfo?.avatar || null}
+              height={64}
+              width={64}
               alt="Profile_Image"
               className="h-16 w-16 rounded-full border-2 border-purple-300"
             />

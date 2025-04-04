@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { IoCall } from "react-icons/io5";
-import { FaVideo } from "react-icons/fa6";
+import { FaPaperclip, FaVideo } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import axios from "axios";
 import UserInfoPopOver from "../UserInfoPopOver";
@@ -13,6 +13,7 @@ import {
   updateFriendOnlineStatus,
 } from "@/lib/redux/features/friendListSlice";
 import { Howl } from "howler";
+import { set } from "react-hook-form";
 
 const FriendChat = ({ friend, chatId }) => {
   const friends = useSelector((state) => state.friendList.friendList);
@@ -23,14 +24,16 @@ const FriendChat = ({ friend, chatId }) => {
   const dispatch = useDispatch();
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
+  const [file, setFile] = useState([]);
+  const [fileUrl, setFileUrl] = useState([]);
 
   const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
   const isOnline = selectedFriend?.friend?.isOnline;
 
   const sound = new Howl({
     src: ["/msg.mp3"],
-    volume: 0.5
-  })
+    volume: 0.5,
+  });
 
   //make io connection
   useEffect(() => {
@@ -100,15 +103,22 @@ const FriendChat = ({ friend, chatId }) => {
   const handleMessageSent = async (e) => {
     e.preventDefault();
     const message = e.target.message.value;
-    if (message.trim()){
+    const data = new FormData();
+    if (file.length > 0) {
+      console.log(file);
+      data.append("file", file)};
+    data.append("content", message);
+    if (message.trim()) {
       try {
         const res = await axios.post(
           `http://localhost:4000/user/message/${chatId}`,
-          { content: message },
+          { data },
           { withCredentials: true }
         );
         e.target.message.value = "";
-        setMessages([...messages, res.data.sendMessage]);
+        setFileUrl([]);
+        setFile([]);
+        // setMessages([...messages, res.data.sendMessage]);
       } catch (error) {
         toast.error(error.response.data.message);
       }
@@ -137,7 +147,7 @@ const FriendChat = ({ friend, chatId }) => {
       messageConatinerRef.current.scrollTop =
         messageConatinerRef.current.scrollHeight;
     }
-  }, [messages, isTyping]);
+  }, [messages, isTyping, fileUrl]);
 
   if (!friend) {
     return (
@@ -147,13 +157,29 @@ const FriendChat = ({ friend, chatId }) => {
     );
   }
 
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    console.log(file);
+    setFile((prev) => [...prev, file]);
+    if (file.type.startsWith("image/")) {
+      setFileUrl((prev) => [...prev, URL.createObjectURL(file)]);
+    } else {
+      setFileUrl((prev) => [...prev, file.name]);
+    }
+  };
+  const handleRemoveFile = (index) => {
+    setFile((prev) => prev.filter((_, i) => i !== index));
+    setFileUrl((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <>
-      {/* <div className="flex flex-col h-screen w-full font-sans bg-gray-900 text-white">
-        <div className="flex justify-between items-center bg-gray-800/95 backdrop-blur-sm px-6 py-3 shadow-lg border-b border-gray-700 sticky top-0 z-10">
-          <div className="flex items-center gap-4">
+      <div className="flex flex-col h-screen w-full font-sans bg-gray-900 text-white">
+        {/* Chat Header */}
+        <div className="flex justify-between items-center bg-gray-800/95 backdrop-blur-sm px-3 sm:px-6 py-2 sm:py-3 shadow-lg border-b border-gray-700 sticky top-0 z-10">
+          <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
                 {friend?.avatar && friend.avatar !== "" ? (
                   <Image
                     src={friend.avatar}
@@ -163,17 +189,17 @@ const FriendChat = ({ friend, chatId }) => {
                     className="rounded-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl text-gray-300">👤</span>
+                  <span className="text-xl sm:text-2xl text-gray-300">👤</span>
                 )}
               </div>
               <span
-                className={`h-3 w-3 border-2 border-gray-800 rounded-full ${
+                className={`h-2 w-2 sm:h-3 sm:w-3 border-2 border-gray-800 rounded-full ${
                   isOnline ? "bg-green-500" : "bg-gray-500"
                 } absolute bottom-0 right-0`}
               ></span>
             </div>
             <div className="flex flex-col">
-              <div className="text-lg font-semibold text-gray-100">
+              <div className="text-base sm:text-lg font-semibold text-gray-100">
                 {friend?.username || "Unknown User"}
               </div>
               <div className="text-xs text-gray-400">
@@ -181,17 +207,17 @@ const FriendChat = ({ friend, chatId }) => {
               </div>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <button className="p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center">
+          <div className="flex gap-1 sm:gap-2 items-center">
+            <button className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center">
               <IoCall
-                size={20}
+                size={18}
                 className="group-hover:text-purple-400 transition-all duration-200"
               />
             </button>
-            <button className="p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center group">
+            <button className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center group">
               <FaVideo
-                size={20}
-                className="text-zinc-200  transition-all duration-200"
+                size={18}
+                className="text-zinc-200 transition-all duration-200"
               />
             </button>
             <div className="h-6 border-l border-gray-600 mx-1 flex items-center">
@@ -202,9 +228,9 @@ const FriendChat = ({ friend, chatId }) => {
 
         <div
           ref={messageConatinerRef}
-          className="flex-grow overflow-y-auto bg-gray-900 p-2 md:p-6 "
+          className="flex-grow overflow-y-auto bg-gray-900 p-2 sm:p-4 md:p-6"
         >
-          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
+          <div className="flex flex-col gap-3 sm:gap-4 max-w-4xl mx-auto">
             {messages.length > 0 ? (
               messages?.map((message, id) => (
                 <div
@@ -214,16 +240,16 @@ const FriendChat = ({ friend, chatId }) => {
                   }`}
                 >
                   {message.senderId !== userInfo._id && (
-                    <div className="self-end mt-5 mr-2">
+                    <div className="self-end mt-4 mr-1 sm:mt-5 sm:mr-2">
                       <img
                         src={message.avatar}
                         alt="image"
-                        className=" h-8 w-8 rounded-full"
+                        className="h-6 w-6 sm:h-8 sm:w-8 rounded-full"
                       />
                     </div>
                   )}
                   <div
-                    className={`max-w-[70%]  px-2 py-1 rounded-lg rounded-${
+                    className={`max-w-[80%] sm:max-w-[70%] px-2 py-1 rounded-lg rounded-${
                       message.senderId === userInfo._id ? "br" : "bl"
                     }-none text-gray-100 ${
                       message.senderId === userInfo._id
@@ -231,9 +257,11 @@ const FriendChat = ({ friend, chatId }) => {
                         : "bg-gray-700 border border-gray-600"
                     }`}
                   >
-                    <p className="break-words">{message.content}</p>
+                    <p className="break-words text-sm sm:text-base">
+                      {message.content}
+                    </p>
                     <span
-                      className={`text-[11px] opacity-60 block mt-1 ${
+                      className={`text-[10px] sm:text-[11px] opacity-60 block mt-1 ${
                         message.senderId !== userInfo._id
                           ? "text-right"
                           : "text-left"
@@ -248,175 +276,81 @@ const FriendChat = ({ friend, chatId }) => {
                 </div>
               ))
             ) : (
-              <div className="text-center text-white">
-                Start Your Converstion
+              <div className="text-center text-white text-sm sm:text-base">
+                Start Your Conversation
               </div>
             )}
 
             {isTyping && (
-              <div className="text-gray-500 italic text-sm">Typing...</div>
+              <div className="text-gray-500 italic text-xs sm:text-sm">
+                Typing...
+              </div>
+            )}
+            {fileUrl.length > 0 && (
+              <div className="w-full flex flex-wrap gap-2 justify-center">
+                {fileUrl.map((f, id) => {
+                  if (typeof f === "string" && f.startsWith("blob:")) {
+                    return (
+                      <span key={id} className="relative">
+                        <Image
+                          src={f}
+                          width={100}
+                          height={100}
+                          alt="file"
+                          style={{ objectFit: "cover" }}
+                        />
+                        <button onClick={() => handleRemoveFile(id)} className="absolute -top-3 -right-2 text-red-500">X</button>
+                      </span>
+                    );
+                  } else {
+                    return (
+                      <span key={id} className="relative">
+                        <div key={id} className="text-gray-500 ">
+                          {f}
+                        </div>
+                        <button onClick={() => handleRemoveFile(id)} className="absolute -top-3 -right-2 text-red-500">X</button>
+
+                      </span>
+                    );
+                  }
+                })}
+              </div>
             )}
           </div>
         </div>
 
+        {/* Chat Input Area */}
         <form action="#" onSubmit={handleMessageSent}>
-          <div className="flex items-center gap-3 p-4 bg-gray-800 border-t border-gray-700">
+          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-4 bg-gray-800 border-t border-gray-700">
+            <label htmlFor="file">
+              <input
+                type="file"
+                id="file"
+                className="hidden"
+                onChange={(e) => handleFile(e)}
+              />
+              <FaPaperclip />
+            </label>
             <input
               name="message"
               placeholder="Type a message..."
-              className="flex-grow h-12 px-4 py-2 rounded-xl text-lg text-gray-100 bg-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none border border-gray-600 resize-none scrollbar-none"
+              className="flex-grow h-10 sm:h-12  px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-base sm:text-lg text-gray-100 bg-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none border border-gray-600 resize-none scrollbar-none relative"
               onChange={(e) => {
                 socket.emit("user-typing", {
                   chatId,
                   typer: userInfo._id,
                 });
               }}
-            ></input>
+            />
             <button
               type="submit"
-              className="h-12 w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"
+              className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"
             >
-              <IoSend size={24} className="text-white" />
+              <IoSend size={20} className="text-white" />
             </button>
           </div>
         </form>
-      </div> */}
-
-<div className="flex flex-col h-screen w-full font-sans bg-gray-900 text-white">
-  {/* Chat Header */}
-  <div className="flex justify-between items-center bg-gray-800/95 backdrop-blur-sm px-3 sm:px-6 py-2 sm:py-3 shadow-lg border-b border-gray-700 sticky top-0 z-10">
-    <div className="flex items-center gap-2 sm:gap-4">
-      <div className="relative">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-          {friend?.avatar && friend.avatar !== "" ? (
-            <Image
-              src={friend.avatar}
-              width={48}
-              height={48}
-              alt="Friend Image"
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <span className="text-xl sm:text-2xl text-gray-300">👤</span>
-          )}
-        </div>
-        <span
-          className={`h-2 w-2 sm:h-3 sm:w-3 border-2 border-gray-800 rounded-full ${
-            isOnline ? "bg-green-500" : "bg-gray-500"
-          } absolute bottom-0 right-0`}
-        ></span>
       </div>
-      <div className="flex flex-col">
-        <div className="text-base sm:text-lg font-semibold text-gray-100">
-          {friend?.username || "Unknown User"}
-        </div>
-        <div className="text-xs text-gray-400">
-          {isOnline ? "Online" : "Offline"}
-        </div>
-      </div>
-    </div>
-    <div className="flex gap-1 sm:gap-2 items-center">
-      <button className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center">
-        <IoCall
-          size={18}
-          className="group-hover:text-purple-400 transition-all duration-200"
-        />
-      </button>
-      <button className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition-all duration-200 flex justify-center items-center group">
-        <FaVideo
-          size={18}
-          className="text-zinc-200 transition-all duration-200"
-        />
-      </button>
-      <div className="h-6 border-l border-gray-600 mx-1 flex items-center">
-        <UserInfoPopOver friend={friend} chatId={chatId} />
-      </div>
-    </div>
-  </div>
-
-  <div
-    ref={messageConatinerRef}
-    className="flex-grow overflow-y-auto bg-gray-900 p-2 sm:p-4 md:p-6"
-  >
-    <div className="flex flex-col gap-3 sm:gap-4 max-w-4xl mx-auto">
-      {messages.length > 0 ? (
-        messages?.map((message, id) => (
-          <div
-            key={id}
-            className={`flex justify-${
-              message?.senderId === userInfo?._id ? "end" : "start"
-            }`}
-          >
-            {message.senderId !== userInfo._id && (
-              <div className="self-end mt-4 mr-1 sm:mt-5 sm:mr-2">
-                <img
-                  src={message.avatar}
-                  alt="image"
-                  className="h-6 w-6 sm:h-8 sm:w-8 rounded-full"
-                />
-              </div>
-            )}
-            <div
-              className={`max-w-[80%] sm:max-w-[70%] px-2 py-1 rounded-lg rounded-${
-                message.senderId === userInfo._id ? "br" : "bl"
-              }-none text-gray-100 ${
-                message.senderId === userInfo._id
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-700 border border-gray-600"
-              }`}
-            >
-              <p className="break-words text-sm sm:text-base">{message.content}</p>
-              <span
-                className={`text-[10px] sm:text-[11px] opacity-60 block mt-1 ${
-                  message.senderId !== userInfo._id
-                    ? "text-right"
-                    : "text-left"
-                }`}
-              >
-                {new Date(message.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-              </span>
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-center text-white text-sm sm:text-base">
-          Start Your Conversation
-        </div>
-      )}
-
-      {isTyping && (
-        <div className="text-gray-500 italic text-xs sm:text-sm">Typing...</div>
-      )}
-    </div>
-  </div>
-
-  {/* Chat Input Area */}
-  <form action="#" onSubmit={handleMessageSent}>
-    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-4 bg-gray-800 border-t border-gray-700">
-      <input
-        name="message"
-        placeholder="Type a message..."
-        className="flex-grow h-10 sm:h-12 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-base sm:text-lg text-gray-100 bg-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none border border-gray-600 resize-none scrollbar-none"
-        onChange={(e) => {
-          socket.emit("user-typing", {
-            chatId,
-            typer: userInfo._id,
-          });
-        }}
-      ></input>
-      <button
-        type="submit"
-        className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"
-      >
-        <IoSend size={20} className="text-white" />
-      </button>
-    </div>
-  </form>
-</div>
-
     </>
   );
 };

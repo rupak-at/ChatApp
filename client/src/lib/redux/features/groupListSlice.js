@@ -1,3 +1,5 @@
+import { Ga_Maamli } from "next/font/google";
+
 const { createSlice } = require("@reduxjs/toolkit");
 
 const initialState = {
@@ -45,6 +47,32 @@ const groupListSlice = createSlice({
       const filteredGroupList = state.groupList.filter((g) => g?.chatId !== chatId)
       state.groupList = filteredGroupList
     },
+
+    groupMemberCountUpdate: (state, action) => {
+      const {groupID, memberID, isAdd} = action.payload
+      if (isAdd) {
+        const addMemberCount = state.groupList.map((g) => {
+          if ( g.chatId === groupID ){
+            g.group.participants.push(memberID)
+            return g
+          }
+          return g;
+        })
+        state.groupList = addMemberCount
+      }else {
+        const removeMemberCount = state.groupList.map((g) => {
+          if ( g.chatId === groupID ){
+            g.group.participants.filter((f) => f._id !== memberID )
+            return g
+          }
+          return g;
+        })
+
+        state.groupList = removeMemberCount
+      }
+
+      
+    },
     removeGroupList: (state) => {
       state.groupList = [];
     },
@@ -58,5 +86,6 @@ export const {
   removeGroupList,
   addGroupList,
   groupRemoveAfterDeletion,
+  groupMemberCountUpdate
 } = groupListSlice.actions;
 export default groupListSlice.reducer;

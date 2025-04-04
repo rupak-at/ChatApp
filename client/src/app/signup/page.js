@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -23,7 +24,8 @@ const Signup = () => {
     formState: { errors, isSubmitting },
   } = useForm();
 
-  const [avatarFile, setAvatarFile] = useState(null); // State for the avatar file
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const password = watch("password");
 
   const onSubmit = async (data) => {
@@ -31,7 +33,7 @@ const Signup = () => {
     formData.append("username", data.username);
     formData.append("email", data.email);
     formData.append("password", data.password);
-    formData.append("avatar", avatarFile); // Append the file
+    formData.append("avatar", avatarFile);
 
     try {
       const response = await axios.post(
@@ -73,11 +75,41 @@ const Signup = () => {
         </div>
 
         <div className="p-4">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
             Create your account
           </h3>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                  <div className="flex flex-col items-center">
+                    <label htmlFor="avatar" className="relative cursor-pointer group">
+                      <div className="h-24 w-24 rounded-full overflow-hidden border-2 border-purple-500 flex items-center justify-center bg-gray-200 transition hover:opacity-90">
+                        {previewUrl ? (
+                          <Image
+                            height={96}
+                            width={96}
+                            src={previewUrl}
+                            alt="Avatar Preview"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <FaImage className="text-gray-500 text-3xl" />
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        id="avatar"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          setAvatarFile(file);
+                          if (file) {
+                            setPreviewUrl(URL.createObjectURL(file));
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
             {/* Username Input */}
             <div>
               <div className="relative flex items-center justify-center">
@@ -132,30 +164,7 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Avatar Upload */}
-            <div className="relative">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <FaImage className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-grow">
-                  <label
-                    htmlFor="avatar"
-                    className="block text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Profile Picture
-                  </label>
-                  <input
-                    type="file"
-                    id="avatar"
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-                    onChange={(e) => {
-                      setAvatarFile(e.target.files[0]);
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Avatar Upload with Preview */}
 
             {/* Password Input */}
             <div>

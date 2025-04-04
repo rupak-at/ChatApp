@@ -76,6 +76,12 @@ const disconnectFriend = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   try {
+    const files = req.files;
+    console.log(files);
+    console.log("hello")
+
+    return res.status(200).json({ message: "Message Sent Successfully" });
+
     const { chatId } = req.params;
 
     if (!mongoose.isValidObjectId(chatId)) {
