@@ -9,8 +9,12 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
     },
+    file:[
+      {
+        type: Object,
+      }
+    ],
     chatId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

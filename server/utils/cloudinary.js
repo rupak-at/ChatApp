@@ -14,9 +14,6 @@ const uploadOnCloudinary = async (localFilePath) => {
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
             resource_type: 'auto', 
             folder: 'avatars',
-            height: 796,
-            width: 1280,
-            crop: "fill",
             quality: "auto",
         });
 
@@ -30,7 +27,6 @@ const uploadOnCloudinary = async (localFilePath) => {
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
         }
-
         // Return the upload result and optimized URL
         return { uploadResult, optimizeUrl };
     } catch (error) {
@@ -46,4 +42,40 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-export { uploadOnCloudinary };
+const uploadOnCloudinaryMutliple = async (localFilePath) => {
+    try {
+        // Upload an file
+        const uploadResult = localFilePath.map(async(f) => {
+            const result = await cloudinary.uploader.upload(f, {
+                resource_type: 'auto', 
+                folder: 'chats',
+                quality: "auto",
+            })
+            return result
+        })
+        const uploadedFile = await Promise.all(uploadResult)
+        console.log("uploadedFile", uploadedFile);
+
+        // Delete the local file after successful upload
+        localFilePath.forEach((f) => {
+            if (fs.existsSync(f)) {
+                fs.unlinkSync(f);
+            }
+        })
+        // Return the upload result and optimized URL
+        return { uploadedFile };
+    } catch (error) {
+        console.error("Upload failed:", error);
+        // Delete the local file if the upload fails
+        localFilePath.forEach((f) => {
+            if (fs.existsSync(f)) {
+                fs.unlinkSync(f);
+            }
+        })
+
+        // Return null or throw an error
+        return null   
+    }
+};
+
+export { uploadOnCloudinary, uploadOnCloudinaryMutliple };

@@ -3,6 +3,7 @@ import { Message } from "../model/messageModel.js";
 import { IndividualChat } from "../model/singleChatModel.js";
 import { User } from "../model/userModel.js";
 import { FriendRequest } from "../model/friendRequestModel.js";
+import { uploadOnCloudinaryMutliple } from "../utils/cloudinary.js";
 
 const getMyMessages = async (req, res) => {
   try {
@@ -18,10 +19,11 @@ const getMyMessages = async (req, res) => {
     }
 
     const formattedMessages = messages.map(
-      ({ sender, content, createdAt }) => ({
+      ({ sender, content, createdAt, file }) => ({
         sender: sender._id.toString() === req.userID ? "You" : sender.username,
         senderId: sender._id,
         avatar: sender.avatar,
+        file,
         content,
         createdAt,
       })
@@ -76,13 +78,8 @@ const disconnectFriend = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   try {
-    const files = req.files;
-    console.log(files);
-    console.log("hello")
-
-    return res.status(200).json({ message: "Message Sent Successfully" });
-
     const { chatId } = req.params;
+    const filesPath = req?.files?.map((file) => file.path);
 
     if (!mongoose.isValidObjectId(chatId)) {
       return res.status(400).json({ message: "Invalid Friend ID" });
@@ -98,11 +95,18 @@ const sendMessage = async (req, res) => {
         .status(401)
         .json({ message: "You Are Not In The Friend List" });
     }
+
+    let uploadedFileURL;
+    if (filesPath.length !==0){
+      const {uploadedFile} = await  uploadOnCloudinaryMutliple(filesPath);
+      uploadedFileURL = uploadedFile
+    }
     const senderUser = await User.findById(req.userID);
 
     const message = await Message.create({
       sender: req.userID,
       content: req.body.content,
+      file:uploadedFileURL || [],
       chatId,
       chatType: "IndividualChat",
     });
@@ -112,6 +116,7 @@ const sendMessage = async (req, res) => {
       senderId: senderUser._id,
       avatar: senderUser.avatar,
       content: message.content,
+      file: message.file,
       createdAt: message.createdAt,
       chatId: chatId,
     };

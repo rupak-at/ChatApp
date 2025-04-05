@@ -13,7 +13,8 @@ import {
   updateFriendOnlineStatus,
 } from "@/lib/redux/features/friendListSlice";
 import { Howl } from "howler";
-import { set } from "react-hook-form";
+import { FileText, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 const FriendChat = ({ friend, chatId }) => {
   const friends = useSelector((state) => state.friendList.friendList);
@@ -26,6 +27,7 @@ const FriendChat = ({ friend, chatId }) => {
   const typingTimeout = useRef(null);
   const [file, setFile] = useState([]);
   const [fileUrl, setFileUrl] = useState([]);
+  const [sendingMsg, setSendingMsg] = useState(false);
 
   const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
   const isOnline = selectedFriend?.friend?.isOnline;
@@ -59,12 +61,13 @@ const FriendChat = ({ friend, chatId }) => {
   useEffect(() => {
     if (socket) {
       socket.on("receive-message", (message) => {
+        console.log(message);
         setMessages((prev) => [...prev, message]);
         dispatch(changeFriendListOrder(message?.chatId));
         console.log(message);
-        if (message.sender !== userInfo._id) {
-          sound.play();
-        }
+        // if (message.sender !== userInfo._id) {
+        //   sound.play();
+        // }
       });
 
       socket.on("user-online", (userId) => {
@@ -105,22 +108,30 @@ const FriendChat = ({ friend, chatId }) => {
     const message = e.target.message.value;
     const data = new FormData();
     if (file.length > 0) {
-      console.log(file);
-      data.append("file", file)};
+      file.forEach((f) => {
+        data.append("file", f);
+      });
+    }
     data.append("content", message);
-    if (message.trim()) {
+    if (message.trim() || file.length > 0) {
       try {
+        setSendingMsg(true);
         const res = await axios.post(
           `http://localhost:4000/user/message/${chatId}`,
-          { data },
+          data,
           { withCredentials: true }
         );
-        e.target.message.value = "";
-        setFileUrl([]);
-        setFile([]);
-        // setMessages([...messages, res.data.sendMessage]);
+        if (res) {
+          e.target.message.value = "";
+          setFileUrl([]);
+          console.log(fileUrl);
+          setFile([]);
+          setSendingMsg(false);
+          // setMessages((prev) => [...prev, res.data.message]);
+        }
       } catch (error) {
         toast.error(error.response.data.message);
+        setSendingMsg(false);
       }
     }
   };
@@ -158,8 +169,8 @@ const FriendChat = ({ friend, chatId }) => {
   }
 
   const handleFile = (e) => {
+    console.log("file event was triggered");
     const file = e.target.files[0];
-    console.log(file);
     setFile((prev) => [...prev, file]);
     if (file.type.startsWith("image/")) {
       setFileUrl((prev) => [...prev, URL.createObjectURL(file)]);
@@ -170,6 +181,55 @@ const FriendChat = ({ friend, chatId }) => {
   const handleRemoveFile = (index) => {
     setFile((prev) => prev.filter((_, i) => i !== index));
     setFileUrl((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const renderFileContent = (file) => {
+    if (file.format === "pdf") {
+      return (
+        <Link
+          key={file.asset_id }
+          target="_blank"
+          href={file.url}
+          className="flex items-center gap-2 p-2 bg-gray-800 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors mb-2 max-w-xs"
+        >
+          <FileText size={16} className="text-red-400" />
+          <span className="text-sm text-white truncate">
+            {file.original_filename}
+          </span>
+        </Link>
+      );
+    } else if (file.resource_type === "video") {
+      return (
+        <div className="mb-2 rounded-lg overflow-hidden max-w-xs" key={file.asset_id}>
+          <video
+            key={file.asset_id}
+            src={file.url}
+            controls
+            className="w-full h-auto rounded-lg"
+            preload="metadata"
+          />
+        </div>
+      );
+    } else {
+      // Image
+      return (
+        <Link
+          key={file.asset_id}
+          target="_blank"
+          href={file.url}
+          className="block mb-2"
+        >
+          <Image
+            src={file.url}
+            height={200}
+            width={300}
+            alt="Shared image"
+            className="rounded-lg border border-gray-600 hover:opacity-90 transition-opacity max-w-xs"
+            style={{ objectFit: "cover" }}
+          />
+        </Link>
+      );
+    }
   };
 
   return (
@@ -257,7 +317,12 @@ const FriendChat = ({ friend, chatId }) => {
                         : "bg-gray-700 border border-gray-600"
                     }`}
                   >
-                    <p className="break-words text-sm sm:text-base">
+                    {message?.file?.length > 0 && (
+                      <div className="mb-2">
+                        {message.file.map((f) => renderFileContent(f))}
+                      </div>
+                    )}
+                    <p className="break-words text-sm sm:text-base ">
                       {message.content}
                     </p>
                     <span
@@ -299,7 +364,12 @@ const FriendChat = ({ friend, chatId }) => {
                           alt="file"
                           style={{ objectFit: "cover" }}
                         />
-                        <button onClick={() => handleRemoveFile(id)} className="absolute -top-3 -right-2 text-red-500">X</button>
+                        <button
+                          onClick={() => handleRemoveFile(id)}
+                          className="absolute -top-3 -right-2 text-red-500"
+                        >
+                          X
+                        </button>
                       </span>
                     );
                   } else {
@@ -308,8 +378,12 @@ const FriendChat = ({ friend, chatId }) => {
                         <div key={id} className="text-gray-500 ">
                           {f}
                         </div>
-                        <button onClick={() => handleRemoveFile(id)} className="absolute -top-3 -right-2 text-red-500">X</button>
-
+                        <button
+                          onClick={() => handleRemoveFile(id)}
+                          className="absolute -top-3 -right-2 text-red-500"
+                        >
+                          X
+                        </button>
                       </span>
                     );
                   }
@@ -342,12 +416,16 @@ const FriendChat = ({ friend, chatId }) => {
                 });
               }}
             />
-            <button
-              type="submit"
-              className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"
-            >
-              <IoSend size={20} className="text-white" />
-            </button>
+            {!sendingMsg ? (
+              <button
+                type="submit"
+                className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 transition"
+              >
+                <IoSend size={20} className="text-white" />
+              </button>
+            ) : (
+              <Loader2 className="animate-spin h-10 w-10 text-purple-500" />
+            )}
           </div>
         </form>
       </div>
