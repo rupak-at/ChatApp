@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { GroupChat } from "../model/groupChatModel.js";
 import { Message } from "../model/messageModel.js";
 import { User } from "../model/userModel.js";
+import { uploadOnCloudinaryMutliple } from "../utils/cloudinary.js";
 
 const createGroup = async (req, res) => {
   try {
@@ -320,9 +321,10 @@ const myMessages = async (req, res) => {
     }
 
     const formattedMessages = messages.map(
-      ({ sender, content, createdAt }) => ({
+      ({ sender, content, createdAt, file }) => ({
         sender: sender.username,
         senderId: sender._id,
+        file,
         content,
         createdAt,
       })
@@ -340,6 +342,8 @@ const myMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const chatId = req.params.id;
+    console.log(req.files);
+    const filesPath = req.files?.map((file) => file.path);
 
     if (!mongoose.isValidObjectId(chatId)) {
       return res.status(400).json({ message: "Invalid Group ID" });
@@ -354,10 +358,16 @@ const sendMessage = async (req, res) => {
     if (!group.participants.includes(req.userID)) {
       return res.status(401).json({ message: "You Are Not In The Group" });
     }
+    let uploadedFileURL;
+    if (filesPath.length !== 0) {
+      const { uploadedFile } = await uploadOnCloudinaryMutliple(filesPath);
+      uploadedFileURL = uploadedFile;
+    }
 
     const message = await Message.create({
       sender: req.userID,
       content: req.body.content,
+      file: uploadedFileURL,
       chatId,
       chatType: "GroupChat",
     });
@@ -369,6 +379,7 @@ const sendMessage = async (req, res) => {
       senderId: senderUser?._id,
       avatar: senderUser.avatar,
       content: message.content,
+      file: message.file || [],
       createdAt: message.createdAt,
       chatId,
     };

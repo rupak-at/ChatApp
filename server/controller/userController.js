@@ -286,7 +286,7 @@ const getAllFriendsWithChatId = async (req, res) => {
     const allMessages = await Message.find({
       chatId: { $in: chatIds }, //gets all documents where chatId is in chatIds []
     })
-      .select("chatId content sender createdAt -_id")
+      .select("chatId content sender createdAt -_id file")
       .sort({ createdAt: -1 }); // sorted for latest message
 
     const formattedMessages = allMessages.reduce((acc, message) => {
@@ -362,7 +362,7 @@ const getAllGroupWithChatdId = async (req, res) => {
     const allGroupMessages = await Message.find({
       chatId: { $in: groupChatIds },
     })
-      .select("sender content createdAt chatId")
+      .select("sender content createdAt chatId file")
       .sort({ createdAt: -1 });
 
     const formattedMessages = allGroupMessages.reduce((acc, msg) => {

@@ -184,10 +184,10 @@ const FriendChat = ({ friend, chatId }) => {
   };
 
   const renderFileContent = (file) => {
-    if (file.format === "pdf") {
+    if (["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf", "odt", "csv", "epub"].includes(file.format)) {
       return (
         <Link
-          key={file.asset_id }
+          key={file.asset_id}
           target="_blank"
           href={file.url}
           className="flex items-center gap-2 p-2 bg-gray-800 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors mb-2 max-w-xs"
@@ -198,9 +198,24 @@ const FriendChat = ({ friend, chatId }) => {
           </span>
         </Link>
       );
-    } else if (file.resource_type === "video") {
+    } else if (["mp3", "wav", "ogg", "aac", "m4a", "flac"].includes(file.format)) {
       return (
-        <div className="mb-2 rounded-lg overflow-hidden max-w-xs" key={file.asset_id}>
+        <div className="mb-2 w-full" key={file.asset_id}>
+          <audio
+            controls
+            className="rounded-md"
+            style={{ height: "40px" }}
+          >
+            <source src={file.url} />
+          </audio>
+        </div>
+      );
+    } else if (file.resource_type === "video" && ["mp4", "webm", "ogg", "mkv", "mov", "avi", "flv", "wmv", "3gp"].includes(file.format)) {
+      return (
+        <div
+          className="mb-2 rounded-lg overflow-hidden max-w-xs"
+          key={file.asset_id}
+        >
           <video
             key={file.asset_id}
             src={file.url}
@@ -318,7 +333,7 @@ const FriendChat = ({ friend, chatId }) => {
                     }`}
                   >
                     {message?.file?.length > 0 && (
-                      <div className="mb-2">
+                      <div className="mt-2 overflow-hidden">
                         {message.file.map((f) => renderFileContent(f))}
                       </div>
                     )}
@@ -366,7 +381,7 @@ const FriendChat = ({ friend, chatId }) => {
                         />
                         <button
                           onClick={() => handleRemoveFile(id)}
-                          className="absolute -top-3 -right-2 text-red-500"
+                          className="absolute -top-[8px] -right-1 text-red-500"
                         >
                           X
                         </button>

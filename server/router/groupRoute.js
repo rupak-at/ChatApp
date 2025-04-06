@@ -10,6 +10,7 @@ import {
   sendMessage,
 } from "../controller/groupController.js";
 import verifyLogin from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/uploadFileMiddleware.js";
 
 const app = Router();
 
@@ -21,5 +22,5 @@ app.post("/removeMember", removeMember);
 app.delete("/leaveGroup/:id", leaveGroup);
 app.get("/myGroups", myGroups);
 app.get("/myMessages/:id", myMessages);
-app.post("/sendMessage/:id", sendMessage);
+app.post("/sendMessage/:id",upload.array("file") ,sendMessage);
 export default app;
