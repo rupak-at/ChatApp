@@ -160,22 +160,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
 
   const renderFileContent = (file) => {
     if (file.url) {
-      if (
-        [
-          "pdf",
-          "doc",
-          "docx",
-          "xls",
-          "xlsx",
-          "ppt",
-          "pptx",
-          "txt",
-          "rtf",
-          "odt",
-          "csv",
-          "epub",
-        ].includes(file.format)
-      ) {
+      if (file.resource_type === "raw") {
         return (
           <Link
             key={file.asset_id}

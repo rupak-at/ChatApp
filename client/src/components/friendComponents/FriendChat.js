@@ -172,7 +172,7 @@ const FriendChat = ({ friend, chatId }) => {
     console.log("file event was triggered");
     const file = e.target.files[0];
     setFile((prev) => [...prev, file]);
-    if (file.type.startsWith("image/")) {
+    if (file?.type?.startsWith("image/")) {
       setFileUrl((prev) => [...prev, URL.createObjectURL(file)]);
     } else {
       setFileUrl((prev) => [...prev, file.name]);
@@ -184,7 +184,7 @@ const FriendChat = ({ friend, chatId }) => {
   };
 
   const renderFileContent = (file) => {
-    if (["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf", "odt", "csv", "epub"].includes(file.format)) {
+    if (file.resource_type === "raw") {
       return (
         <Link
           key={file.asset_id}

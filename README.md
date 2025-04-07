@@ -16,9 +16,10 @@ A real-time chat application built with modern web technologies.
 
 ## Tech Stack
 
-- **Frontend:** React, Next.js, Tailwind CSS
+- **Frontend:** React, Next.js, Tailwind CSS, Redux Toolkit
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB (using Mongoose)
+- **Services:** Cloudinary
 - **Authentication:** JWT (JSON Web Tokens)
 
 
@@ -42,7 +43,7 @@ A real-time chat application built with modern web technologies.
 ### Chat Features
 - [✅] Implement typing indicator in real-time chat
 - [✅] Add timestamp to messages
-- [ ] Enable sending media (images, files, etc.)
+- [✅] Enable sending media (images, files, etc.)
 
 
 ### UI/UX
