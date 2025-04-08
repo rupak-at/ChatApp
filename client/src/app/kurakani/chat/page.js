@@ -9,11 +9,14 @@ const Chat = () => {
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [searchFriend, setSearchFriend] = useState("");
   const [chatId, setChatId] = useState("");
+  const [openChat, setOpenChat] = useState("");
 
   const handleFriendSelected = (friend, chatId) => {
     setSelectedFriend(friend);
     setChatId(chatId);
+    setOpenChat(chatId);
   };
+
 
   return (
     <div className="flex h-screen">
@@ -29,6 +32,7 @@ const Chat = () => {
             onClickFriend={handleFriendSelected}
             chattingFriend={selectedFriend}
             searchFriend={searchFriend}
+            openChat={openChat}
           />
         </div>
       </div>

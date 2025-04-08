@@ -16,7 +16,7 @@ import { Howl } from "howler";
 import { FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-const FriendChat = ({ friend, chatId }) => {
+const FriendChat = ({ friend, chatId}) => {
   const friends = useSelector((state) => state.friendList.friendList);
   const userInfo = useSelector((state) => state.userInfo.userInfo);
   const messageConatinerRef = useRef();
@@ -61,10 +61,10 @@ const FriendChat = ({ friend, chatId }) => {
   useEffect(() => {
     if (socket) {
       socket.on("receive-message", (message) => {
-        console.log(message);
-        setMessages((prev) => [...prev, message]);
+        if (chatId === message.chatId ) {
+          setMessages((prev) => [...prev, message]);
+        }
         dispatch(changeFriendListOrder(message?.chatId));
-        console.log(message);
         // if (message.sender !== userInfo._id) {
         //   sound.play();
         // }
@@ -124,7 +124,6 @@ const FriendChat = ({ friend, chatId }) => {
         if (res) {
           e.target.message.value = "";
           setFileUrl([]);
-          console.log(fileUrl);
           setFile([]);
           setSendingMsg(false);
           // setMessages((prev) => [...prev, res.data.message]);
