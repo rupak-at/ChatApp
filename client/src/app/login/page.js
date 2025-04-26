@@ -25,7 +25,7 @@ const LoginForm = () => {
 
   const handleLogin = async (data) => {
     try {
-      const response = await axios.post("http://localhost:4000/login", data, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}/login`, data, {
         withCredentials: true,
       });
 

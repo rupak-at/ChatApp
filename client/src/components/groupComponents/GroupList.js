@@ -18,7 +18,7 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", {
+    const newSocket = io(`${process.env.NEXT_PUBLIC_URL}`, {
       withCredentials: true,
     });
 
@@ -53,7 +53,6 @@ const GroupList = ({ handleGroupSelect, searchGroup, selectGroup }) => {
       });
 
       socket.on("new-group-creation", (data) => {
-        // console.log(data);
         //showing to participants only
         if (data.group.participants.map((f) => f._id).includes(userInfo._id)) {
           dispatch(addGroupList(data));

@@ -1,4 +1,4 @@
-import { Plus, SearchIcon, Settings } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import React from "react";
 import GroupCreationPopOver from "./GroupCreationPopOver";
 

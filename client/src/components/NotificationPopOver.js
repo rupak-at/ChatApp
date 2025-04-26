@@ -21,7 +21,7 @@ const NotificationPopOver = () => {
   const dispatch = useDispatch();
   const handleAccept = async (requestId) => {
     try {
-      const {data} = await axios.post(`http://localhost:4000/request/acceptRequest/${requestId}`,{}, {withCredentials: true});
+      const {data} = await axios.post(`${process.env.NEXT_PUBLIC_URL}/request/acceptRequest/${requestId}`,{}, {withCredentials: true});
       if (data){
         toast.success("Request Accepted");
         getFriends().then((res) => dispatch(setFriendList(res)));
@@ -37,7 +37,7 @@ const NotificationPopOver = () => {
 
   const handleDecline = async (requestId) => {
     try {
-      const {data} = await axios.post(`http://localhost:4000/request/rejectRequest/${requestId}`,{}, {withCredentials: true});
+      const {data} = await axios.post(`${process.env.NEXT_PUBLIC_URL}/request/rejectRequest/${requestId}`,{}, {withCredentials: true});
         if (data) {
             toast.success("Request Declined");
             dispatch(removeFriendRequestDetails(requestId));

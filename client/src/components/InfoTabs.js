@@ -74,12 +74,12 @@ const UserUpdateDetails = () => {
 
   const handlePassword = async (data) => {
     try {
-      await axios.post("http://localhost:4000/updatePassword", data, {
+      await axios.post(`${process.env.NEXT_PUBLIC_URL}/updatePassword`, data, {
         withCredentials: true,
       });
       toast.success("Password Updated Successfully");
       await axios.post(
-        "http://localhost:4000/logout",
+        `${process.env.NEXT_PUBLIC_URL}/logout`,
         {},
         { withCredentials: true }
       );

@@ -18,7 +18,7 @@ const UserInfoPopOver = ({friend, chatId}) => {
 
   const handleRemoveFriend = async(chatId) => {
     try {
-      const {data} = await axios.delete(`http://localhost:4000/user/remove/${chatId}`,{withCredentials: true});
+      const {data} = await axios.delete(`${process.env.NEXT_PUBLIC_URL}/user/remove/${chatId}`,{withCredentials: true});
 
       if (data) {
         getFriends().then((res) => dispatch(setFriendList(res)));

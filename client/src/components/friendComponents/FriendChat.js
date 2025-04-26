@@ -32,14 +32,10 @@ const FriendChat = ({ friend, chatId}) => {
   const selectedFriend = friends.find((f) => f?.friend?._id === friend?._id);
   const isOnline = selectedFriend?.friend?.isOnline;
 
-  const sound = new Howl({
-    src: ["/msg.mp3"],
-    volume: 0.5,
-  });
 
   //make io connection
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", {
+    const newSocket = io(`${process.env.NEXT_PUBLIC_URL}`, {
       withCredentials: true,
     });
 
@@ -65,9 +61,6 @@ const FriendChat = ({ friend, chatId}) => {
           setMessages((prev) => [...prev, message]);
         }
         dispatch(changeFriendListOrder(message?.chatId));
-        // if (message.sender !== userInfo._id) {
-        //   sound.play();
-        // }
       });
 
       socket.on("user-online", (userId) => {
@@ -117,7 +110,7 @@ const FriendChat = ({ friend, chatId}) => {
       try {
         setSendingMsg(true);
         const res = await axios.post(
-          `http://localhost:4000/user/message/${chatId}`,
+          `${process.env.NEXT_PUBLIC_URL}/user/message/${chatId}`,
           data,
           { withCredentials: true }
         );
@@ -126,7 +119,6 @@ const FriendChat = ({ friend, chatId}) => {
           setFileUrl([]);
           setFile([]);
           setSendingMsg(false);
-          // setMessages((prev) => [...prev, res.data.message]);
         }
       } catch (error) {
         toast.error(error.response.data.message);
@@ -139,7 +131,7 @@ const FriendChat = ({ friend, chatId}) => {
     const getMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:4000/user/myMessages/${chatId}`,
+          `${process.env.NEXT_PUBLIC_URL}/user/myMessages/${chatId}`,
           { withCredentials: true }
         );
         setMessages(res.data.messages);

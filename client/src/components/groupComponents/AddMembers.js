@@ -10,16 +10,14 @@ import {
 import { groupMemberCountUpdate, setGroupList } from "@/lib/redux/features/groupListSlice";
 import { Check, CircleMinus, Plus } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { io } from "socket.io-client";
 
 const AddMembers = ({ chatId }) => {
   const { friendList } = useSelector((state) => state.friendList);
   const dispatch = useDispatch();
-  const [socket, setSocket] = useState(null);
 
   const { handleSubmit } = useForm();
   const [selectedFriends, setSelectedFriends] = useState([]);
@@ -29,21 +27,6 @@ const AddMembers = ({ chatId }) => {
       setSelectedFriends((prev) => [...prev, friend]);
     }
   };
-
-  // useEffect(() => {
-  //   const newSocket = io("http://localhost:4000", { withCredentials: true });
-  //   if (newSocket) {
-  //     setSocket(newSocket);
-  //   }
-  // }, [])
-
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.on("new-member", (data) => {
-  //       dispatch(setGroupList(data));
-  //     });
-  //   }
-  // }, [socket]);
 
   const onSubmit = async (data) => {
     const groupID = chatId;
@@ -55,9 +38,6 @@ const AddMembers = ({ chatId }) => {
         toast.success(res)
         dispatch(groupMemberCountUpdate({groupID, memberID, isAdd: true}))
 
-        // if (socket) {
-        //   socket.emit("addMember", { groupID, members });
-        // }
       })
       .catch((err) => toast.error(err));
   };

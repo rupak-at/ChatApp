@@ -9,14 +9,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { setGroupList } from "@/lib/redux/features/groupListSlice";
-import axios from "axios";
 import { Check, CircleMinus, Plus } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { io } from "socket.io-client";
 
 const GroupCreationPopOver = () => {
   const { friendList } = useSelector((state) => state.friendList);
@@ -24,25 +22,12 @@ const GroupCreationPopOver = () => {
   const { register, handleSubmit } = useForm();
   const [selectedFriends, setSelectedFriends] = useState([]);
   const dispatch = useDispatch();
-  const [socket, setSocket] = useState(null);
 
   const addFriend = (friend) => {
     if (!selectedFriends.some((f) => f._id === friend._id)) {
       setSelectedFriends((prev) => [...prev, friend._id]);
     }
   };
-
-  // useEffect(()=> {
-  //   const newSocket = io("http://localhost:4000", { withCredentials: true });
-
-  //   if (newSocket) {
-  //     setSocket(newSocket);
-  //   }
-
-  //   return () => {
-  //     newSocket.disconnect();
-  //   }
-  // },[])
 
 
   const onSubmit = (data) => {

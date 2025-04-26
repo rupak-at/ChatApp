@@ -16,9 +16,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import UpdateInfo from "./UpdateInfo";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { removeUserInfo } from "@/lib/redux/features/loginInfoSlice";
-import { addFriendRequestDetails, removeFriendRequestDetails, removeWhileLogout, setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
+import { addFriendRequestDetails, removeWhileLogout, setFriendRequestDetails } from "@/lib/redux/features/friendRequestDetailsSlice";
 import { io } from "socket.io-client";
 import {
   removeFriendList,
@@ -53,11 +53,10 @@ const NavBar = () => {
     const getAllRequest = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:4000/request/allrequest`,
+          `${process.env.NEXT_PUBLIC_URL}/request/allrequest`,
           { withCredentials: true }
         );
         dispatch(setFriendRequestDetails(res.data.request));
-        // console.log(res.data.request);
       } catch (error) {
         console.log(error);
       }
@@ -66,7 +65,7 @@ const NavBar = () => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", { withCredentials: true });
+    const newSocket = io(`${process.env.NEXT_PUBLIC_URL}`, { withCredentials: true });
 
     if (newSocket) {
       setSocket(newSocket);
@@ -103,7 +102,7 @@ const NavBar = () => {
         socket.emit("logout", userInfo._id);
       }
       const res = await axios.post(
-        "http://localhost:4000/logout",
+        `${process.env.NEXT_PUBLIC_URL}/logout`,
         {},
         { withCredentials: true }
       );
@@ -175,7 +174,7 @@ const NavBar = () => {
       <div className="mb-4 flex flex-col gap-2 items-center">
         <Popover className="">
           <PopoverTrigger asChild>
-            <img
+            <Image
               src={
               userInfo?.avatar || null}
               height={64}

@@ -26,7 +26,7 @@ const FriendList = ({ onClickFriend, chattingFriend, searchFriend, openChat }) =
   }, [dispatch]);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", {
+    const newSocket = io(`${process.env.NEXT_PUBLIC_URL}`, {
       withCredentials: true,
     });
 

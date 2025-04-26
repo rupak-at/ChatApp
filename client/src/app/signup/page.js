@@ -37,7 +37,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/register",
+        `${NEXT_PUBLIC_URL}/register`,
         formData
       );
 

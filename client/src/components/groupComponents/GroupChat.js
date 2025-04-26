@@ -30,7 +30,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
     const getMessages = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:4000/group/myMessages/${chatId}`,
+          `${process.env.NEXT_PUBLIC_URL}/group/myMessages/${chatId}`,
           { withCredentials: true }
         );
         setMessages(data?.messages);
@@ -47,7 +47,7 @@ const GroupChat = ({ selectGroup, chatId }) => {
   }, [chatId]);
   //socket initialization
   useEffect(() => {
-    const newSocket = io("http://localhost:4000", { withCredentials: true });
+    const newSocket = io(`${process.env.NEXT_PUBLIC_URL}`, { withCredentials: true });
 
     if (newSocket) {
       setSocket(newSocket);
@@ -107,12 +107,11 @@ const GroupChat = ({ selectGroup, chatId }) => {
     if (content.trim() || file.length > 0) {
       try {
         const res = await axios.post(
-          `http://localhost:4000/group/sendMessage/${chatId}`,
+          `${process.env.NEXT_PUBLIC_URL}/group/sendMessage/${chatId}`,
           data,
           { withCredentials: true }
         );
         if (res) {
-          // setMessages((prev) => [...prev, res?.data?.sendMessage]);
           setSendingMsg(false);
           setFileUrl([]);
           setFile([]);
