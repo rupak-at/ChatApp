@@ -109,11 +109,11 @@ const NavBar = () => {
 
       if (res.status === 200) {
         toast.success(res.data?.message);
+        router.push("/login");
         dispatch(removeUserInfo());
         dispatch(removeFriendList());
         dispatch(removeGroupList());
         dispatch(removeWhileLogout());
-        router.push("/login");
       }
     } catch (error) {
       const { message } = error.response?.data;
@@ -174,14 +174,20 @@ const NavBar = () => {
       <div className="mb-4 flex flex-col gap-2 items-center">
         <Popover className="">
           <PopoverTrigger asChild>
-            <Image
-              src={
-              userInfo?.avatar || null}
-              height={64}
-              width={64}
-              alt="Profile_Image"
-              className="h-16 w-16 rounded-full border-2 border-purple-300"
-            />
+            {
+              userInfo?.avatar ? (
+                <Image
+                  src={
+                    userInfo?.avatar}
+                  height={64}
+                  width={64}
+                  alt="Profile_Image"
+                  className="h-16 w-16 rounded-full border-2 border-purple-300"
+                />
+              ) : (
+                <div className="h-16 w-16 rounded-full border-2 border-purple-300">🦝</div>
+              )
+            }
           </PopoverTrigger>
           <PopoverContent className="w-80 bg-gray-900  border border-white">
             <div className="grid gap-4">
