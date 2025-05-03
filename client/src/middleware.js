@@ -1,27 +1,26 @@
-import { NextResponse } from 'next/server'
-import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
-export function middleware(request) {
-  const token = request.cookies.get('accessToken')?.value
-
-  // If no token and accessing a protected route
-  if (!token && request.nextUrl.pathname.startsWith('/kurakani')) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // If there is a token, check if it is valid
-  if (token) {
-    try {
-      jwt.verify(token, process.env.NEXT_PUBLIC_ACCESS_TOKEN_SECRET)
-    } catch (err) {
-      return NextResponse.redirect(new URL('/login', request.url))
+export async function middleware(request) {
+    const token = request.cookies.get('accessToken')?.value;
+    
+    if (!token) {
+        return NextResponse.redirect(new URL('/login', request.url));
     }
-  }
 
-  // Otherwise, continue
-  return NextResponse.next()
+    try {
+        const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_ACCESS_TOKEN_SECRET);
+        await jwtVerify(token, secret);
+        return NextResponse.next();
+    } catch (error) {
+        console.error("JWT verification failed:", error);
+        // Clear invalid token
+        const response = NextResponse.redirect(new URL('/login', request.url));
+        response.cookies.delete('accessToken');
+        return response;
+    }
 }
 
 export const config = {
-  matcher: ['/kurakani/:path*'] // Only apply middleware to /kurakani routes
+    matcher: '/kurakani/:path*'
 }
