@@ -3,7 +3,7 @@ import axios from "axios";
 const leaveGroup = async (groupID) => {
   try {
     const { data } = await axios.delete(
-      `http://localhost:4000/group/leaveGroup/${groupID}`,
+      `${process.env.NEXT_PUBLIC_URL}/group/leaveGroup/${groupID}`,
       { withCredentials: true }
     );
 

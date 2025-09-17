@@ -19,24 +19,14 @@ const Search = () => {
     const getAllUsers = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:4000/allusers`,
+          process.env.NEXT_PUBLIC_URL + "/allusers",
           { withCredentials: true }
         );
   
         // console.log(res.data.user);
         setUsers(res.data.user);
       } catch (error) {
-        toast(error.response.data.message, {
-          icon: "❌",
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-          duration: 1000,
-        });
-  
-        console.error(error);
+        toast("An error occur");
       }
     }
 

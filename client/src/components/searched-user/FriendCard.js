@@ -8,9 +8,9 @@ const FriendCard = ({ username, avatar, isOnline, _id }) => {
 
   const sendRequest =  (id) => {
     sendFriendRequest(id).then((res) => {
-      toast.success(res);
+      toast.success("Friend request sent");
     }).catch((e) => {
-      toast.error(e);
+      toast.error("an Error occurred");
     })
   };
   return (

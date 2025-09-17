@@ -2,7 +2,7 @@ import axios from "axios";
 
 const getGroups = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/group", {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_URL}/group`, {
         withCredentials: true,
       });
       return data?.groups

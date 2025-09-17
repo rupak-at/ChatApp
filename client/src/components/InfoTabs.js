@@ -44,7 +44,7 @@ const UserUpdateDetails = () => {
 
       if (userInfo.username !== username) {
         await axios.post(
-          "http://localhost:4000/updateUserName",
+          `${process.env.NEXT_PUBLIC_URL}/updateUserName`,
           { username },
           { withCredentials: true }
         );
@@ -52,14 +52,14 @@ const UserUpdateDetails = () => {
 
       if (avatarFile) {
         formData.append("avatar", avatarFile);
-        await axios.post("http://localhost:4000/updateAvatar", formData, {
+        await axios.post(`${process.env.NEXT_PUBLIC_URL}/updateAvatar`, formData, {
           withCredentials: true,
         });
       }
       toast.success("Profile Updated Successfully");
 
       await axios.post(
-        "http://localhost:4000/logout",
+        `${process.env.NEXT_PUBLIC_URL}/logout`,
         {},
         { withCredentials: true }
       );

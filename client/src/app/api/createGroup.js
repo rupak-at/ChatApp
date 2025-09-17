@@ -3,7 +3,7 @@ import axios from "axios";
 const createGroup = async (name, members) => {
     try {
         const { data } = await axios.post(
-          "http://localhost:4000/group/makeGroup",
+          `${process.env.NEXT_PUBLIC_URL}/group/makeGroup`,
           { name, members },
           { withCredentials: true }
         );

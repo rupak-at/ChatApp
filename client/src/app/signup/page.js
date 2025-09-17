@@ -34,10 +34,10 @@ const Signup = () => {
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("avatar", avatarFile);
-
+    console.log("befoter try catch")
     try {
       const response = await axios.post(
-        `${NEXT_PUBLIC_URL}/register`,
+        `${process.env.NEXT_PUBLIC_URL}/register`,
         formData
       );
 
@@ -46,17 +46,17 @@ const Signup = () => {
         router.push("/login");
       }
     } catch (error) {
-      const { message } = error.response?.data;
-
+      console.error("some error occure while sign up", error)
+      const { message  } = error.response || "some error occurred"
       if (error.response) {
         if (error.response.status === 400) {
-          toast.error(message);
+          toast.error(message ?? "some error occurred");
         }
         if (error.response.status === 409) {
-          toast.error(message);
+          toast.error(message ?? "some error occurred");
         }
         if (error.response.status === 500) {
-          toast.error(message);
+          toast.error(message ?? "some error occurred");
         }
       }
     }

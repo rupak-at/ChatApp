@@ -2,7 +2,7 @@ import axios from "axios"
 
 const groupDeletion =  async (groupId) => {
   try {
-    const {data} = await axios.delete(`http://localhost:4000/group/deleteGroup/${groupId}`,{withCredentials: true});
+    const {data} = await axios.delete(`${process.env.NEXT_PUBLIC_URL}/group/deleteGroup/${groupId}`,{withCredentials: true});
 
     if (data) {
         return data?.message

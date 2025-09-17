@@ -3,7 +3,7 @@ import axios from "axios";
 const addGroupMember = async (groupID, memberID) => {
     try {
         const { data } = await axios.put(
-          "http://localhost:4000/group/addMember",
+          `${process.env.NEXT_PUBLIC_URL}/group/addMember`,
           { groupID, memberID },
           { withCredentials: true }
         );
